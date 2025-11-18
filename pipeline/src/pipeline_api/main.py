@@ -1,8 +1,9 @@
 from fastapi import FastAPI
-from .utils.pdf import parse_pdf
+from .utils.parse import parse_pdf
 from .utils.chunking import chunk_document_elements_semantically, chunk_document_recursively, chunk_document_simply
+from dotenv import load_dotenv
 
-
+load_dotenv()
 app = FastAPI()
 
 def main():
