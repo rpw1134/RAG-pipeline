@@ -6,12 +6,15 @@ authors = [
     {name = "rpw1134",email = "ryanw1134@gmail.com"}
 ]
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.12,<4.0.0"
 dependencies = [
     "fastapi (>=0.121.2,<0.122.0)",
     "uvicorn (>=0.38.0,<0.39.0)",
     "unstructured[pdf] (>=0.18.18,<0.19.0)",
     "pymupdf (>=1.26.6,<2.0.0)",
+    "langchain (>=1.0.7,<2.0.0)",
+    "langchain-text-splitters (>=1.0.0,<2.0.0)",
+    "langchain-core (>=1.0.5,<2.0.0)",
 ]
 
 [tool.poetry]
