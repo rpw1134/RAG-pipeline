@@ -6,6 +6,24 @@ from langchain_core.documents.base import Document
 def chunk_document_elements_semantically(elements: List[Element], chunk_size: int = 1000, overlap: int = 200) -> List[Document]:
     sections: List[str] = group_related_elements(elements=elements)
     documents: List[Document] = []
+    splitter = RecursiveCharacterTextSplitter(
+        separators=["\n\n", "\n", " ", ""],
+        chunk_size=chunk_size,
+        chunk_overlap=overlap,
+    )
+    for i, section in enumerate(sections):
+        if len(section.strip())<=chunk_size:
+            doc = Document(page_content=section, metadata={"section": i, "total_sections": len(sections), "chunk_of_section": 0, "total_chunks_in_section": 1})
+            documents.append(doc)
+            continue
+        chunks = splitter.split_text(section)
+        num_chunks = len(chunks)
+        for j, chunk in enumerate(chunks):
+            doc = Document(page_content=chunk, metadata={"section": i, "total_sections": len(sections), "chunk_of_section": j+1, "total_chunks_in_section": num_chunks})
+            documents.append(doc)
+    
+    return documents
+        
             
         
     
@@ -18,26 +36,23 @@ def chunk_document_recursively(elements: List[Element], chunk_size: int = 1000, 
     )
     chunks = splitter.split_text(document)
     num_chunks = len(chunks)
-    print(f"Number of chunks created: {num_chunks}")
     documents: List[Document] = []
     for i, chunk in enumerate(chunks):
-        doc = Document(page_content=chunk, metadata={"chunk": i, "total_chunks": num_chunks})
+        doc = Document(page_content=chunk, metadata={"chunk": i+1, "total_chunks": num_chunks})
         documents.append(doc)
     return documents
 
 def chunk_document_simply(elements: List[Element], chunk_size: int = 1000, overlap: int = 200)  -> List[Document]:
     document: str = "\n\n".join([str(element.text) for element in elements if element.text])
     splitter = CharacterTextSplitter(
-        seperator="\n\n",
         chunk_size=chunk_size,
         chunk_overlap=overlap,
     )
     chunks = splitter.split_text(document)
     num_chunks = len(chunks)
-    print(f"Number of chunks created: {num_chunks}")
     documents: List[Document] = []
     for i, chunk in enumerate(chunks):
-        doc = Document(page_content=chunk, metadata={"chunk": i, "total_chunks": num_chunks})
+        doc = Document(page_content=chunk, metadata={"chunk": i+1, "total_chunks": num_chunks})
         documents.append(doc)
     
     return documents
@@ -50,19 +65,17 @@ def group_related_elements(elements: List[Element]) -> List[str]:
         element: Element = elements[i]
         type_of: str = element.category
         current = f"{element.text}\n\n" if element.text else ""
+        i+=1
         if type_of in ["Title", "Header"]:
             while i<len(elements) and elements[i].category == "NarativeText":
                 current += f"{elements[i].text}\n" if elements[i].text else ""
                 i += 1
-            sections.append(current)
-            current = ""
         elif type_of == "FigureCaption":
             while i<len(elements) and elements[i].category in ["Table", "ListItem"]:
                 current += f"{elements[i].text}\n" if elements[i].text else ""
                 i += 1
         else:
             current += f"{element.text}\n" if element.text else ""
-            i += 1
         if current:
             sections.append(current)
             current = ""
