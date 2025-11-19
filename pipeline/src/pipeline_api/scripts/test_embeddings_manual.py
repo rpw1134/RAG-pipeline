@@ -7,7 +7,7 @@ import dotenv
 dotenv.load_dotenv()
 
 from langchain_core.documents.base import Document
-from ..utils.embedding import embed_chunks, embed_openai
+from ..utils.embedding import embed_chunks, embed_openai, embed_hugging_face
 
 print("Loaded environment variables from .env file")
 def main():
@@ -67,6 +67,62 @@ def main():
         if len(embeddings) > 0:
             print(f"   Embedding dimension: {len(embeddings[0])}")
             print(f"   First embedding (first 10 values): {embeddings[0][:10]}")
+    except Exception as e:
+        print(f"❌ Error: {e}")
+
+    # Test HuggingFace Small Model
+    print("\n" + "=" * 60)
+    print("Testing embed_chunks() with 'small_hugging_face'")
+    print("=" * 60)
+    try:
+        embeddings = embed_chunks(test_documents, embedding_model="small_hugging_face")
+        print(f"✅ Success! Generated {len(embeddings)} embeddings")
+        if len(embeddings) > 0:
+            print(f"   Model: BAAI/bge-small-en-v1.5")
+            print(f"   Embedding dimension: {len(embeddings[0])}")
+            print(f"   First embedding (first 10 values): {embeddings[0][:10]}")
+    except Exception as e:
+        print(f"❌ Error: {e}")
+
+    # Test HuggingFace Base Model
+    print("\n" + "=" * 60)
+    print("Testing embed_chunks() with 'base_hugging_face'")
+    print("=" * 60)
+    try:
+        embeddings = embed_chunks(test_documents, embedding_model="base_hugging_face")
+        print(f"✅ Success! Generated {len(embeddings)} embeddings")
+        if len(embeddings) > 0:
+            print(f"   Model: BAAI/bge-base-en-v1.5")
+            print(f"   Embedding dimension: {len(embeddings[0])}")
+            print(f"   First embedding (first 10 values): {embeddings[0][:10]}")
+    except Exception as e:
+        print(f"❌ Error: {e}")
+
+    # Test HuggingFace Large Model
+    print("\n" + "=" * 60)
+    print("Testing embed_chunks() with 'large_hugging_face'")
+    print("=" * 60)
+    try:
+        embeddings = embed_chunks(test_documents, embedding_model="large_hugging_face")
+        print(f"✅ Success! Generated {len(embeddings)} embeddings")
+        if len(embeddings) > 0:
+            print(f"   Model: BAAI/bge-large-en-v1.5")
+            print(f"   Embedding dimension: {len(embeddings[0])}")
+            print(f"   First embedding (first 10 values): {embeddings[0][:10]}")
+    except Exception as e:
+        print(f"❌ Error: {e}")
+
+    # Test HuggingFace function directly
+    print("\n" + "=" * 60)
+    print("Testing embed_hugging_face() directly with 'small_hugging_face'")
+    print("=" * 60)
+    try:
+        embeddings = embed_hugging_face(test_documents, model="small_hugging_face")
+        print(f"✅ Success! Generated {len(embeddings)} embeddings")
+        if len(embeddings) > 0:
+            print(f"   Embedding dimension: {len(embeddings[0])}")
+            print(f"   First embedding (first 10 values): {embeddings[0][:10]}")
+            print(f"   Second embedding (first 10 values): {embeddings[1][:10]}")
     except Exception as e:
         print(f"❌ Error: {e}")
 

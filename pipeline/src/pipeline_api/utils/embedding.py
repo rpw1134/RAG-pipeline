@@ -1,12 +1,24 @@
 from typing import List
 from langchain_core.documents.base import Document
 from .clients import clients
+from sentence_transformers import SentenceTransformer
 
 
 def embed_chunks(chunks: List[Document], embedding_model: str) -> List[List[float]]:
     embeddings: List[List[float]] = []
-    if embedding_model == "openai_small":
-        embeddings = embed_openai(chunks, model="text-embedding-3-small")
+    match embedding_model:
+        case "openai_small":
+            embeddings = embed_openai(chunks, model="text-embedding-3-small")
+        case "openai_large":
+            embeddings = embed_openai(chunks, model="text-embedding-3-large")
+        case "small_hugging_face":
+            embeddings = embed_hugging_face(chunks, model="small_hugging_face")
+        case "base_hugging_face":
+            embeddings = embed_hugging_face(chunks, model="base_hugging_face")
+        case "large_hugging_face":
+            embeddings = embed_hugging_face(chunks, model="large_hugging_face")
+        case _:
+            raise ValueError(f"Unsupported embedding model: {embedding_model}")
     return embeddings
 
 def embed_openai(chunks: List[Document], model) -> List[List[float]]:
@@ -15,3 +27,9 @@ def embed_openai(chunks: List[Document], model) -> List[List[float]]:
         model=model
     )
     return list(map(lambda res: res.embedding, response.data))
+
+def embed_hugging_face(chunks: List[Document], model: str) -> List[List[float]]:
+    hf_client: SentenceTransformer = clients[model]
+    texts = [chunk.page_content for chunk in chunks]
+    embeddings = hf_client.encode(texts, normalize_embeddings=True).tolist()
+    return embeddings
