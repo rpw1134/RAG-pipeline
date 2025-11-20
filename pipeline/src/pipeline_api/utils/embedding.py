@@ -2,9 +2,10 @@ from typing import List
 from langchain_core.documents.base import Document
 from .clients import clients
 from sentence_transformers import SentenceTransformer
+import numpy as np
+from numpy.typing import NDArray
 
-
-def embed_chunks(chunks: List[Document], embedding_model: str) -> List[List[float]]:
+def embed_chunks(chunks: List[Document], embedding_model: str) -> NDArray[np.float32]:
     embeddings: List[List[float]] = []
     match embedding_model:
         case "openai_small":
@@ -19,7 +20,8 @@ def embed_chunks(chunks: List[Document], embedding_model: str) -> List[List[floa
             embeddings = embed_hugging_face(chunks, model="large_hugging_face")
         case _:
             raise ValueError(f"Unsupported embedding model: {embedding_model}")
-    return embeddings
+    
+    return np.array(embeddings, dtype=np.float32)
 
 def embed_openai(chunks: List[Document], model) -> List[List[float]]:
     response = clients["openai_small"].create(
