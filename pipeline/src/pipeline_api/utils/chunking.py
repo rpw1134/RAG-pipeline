@@ -77,7 +77,7 @@ def group_related_elements(elements: List[Element]) -> List[str]:
         current = f"{element.text}\n\n" if element.text else ""
         i+=1
         if type_of in ["Title", "Header"]:
-            while i<len(elements) and elements[i].category == "NarativeText":
+            while i<len(elements) and elements[i].category in ["NarrativeText", "ListItem", "Table"]:
                 current += f"{elements[i].text}\n" if elements[i].text else ""
                 i += 1
         elif type_of == "FigureCaption":

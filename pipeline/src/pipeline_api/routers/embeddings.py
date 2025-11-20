@@ -19,4 +19,4 @@ async def embed_document(file: UploadFile, config: str = Form(...)):
     chunks = chunk_document(elements=elements, chunking_strategy=config_data.chunking_strategy)
     embeddings = embed_chunks(chunks=chunks, embedding_model=config_data.model)
     add_vectors(collection_name=config_data.model, embeddings=embeddings, documents=chunks)
-    return {"embeddings": embeddings.tolist()}
+    return {"elements": [element.to_dict() for element in elements], "num_chunks": len(chunks)}
