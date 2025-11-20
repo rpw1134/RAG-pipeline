@@ -16,16 +16,15 @@ base_hugging_face_client: SentenceTransformer = SentenceTransformer('BAAI/bge-ba
 large_hugging_face_client: SentenceTransformer = SentenceTransformer('BAAI/bge-large-en-v1.5', device='mps')
 
 clients = {
-    "openai_small": openai_client.embeddings,
-    "openai_large": openai_client.embeddings,
-    "small_hugging_face": small_hugging_face_client,
-    "base_hugging_face": base_hugging_face_client,
-    "large_hugging_face": large_hugging_face_client,}
+    "openai": openai_client.embeddings,
+    "huggingface_small": small_hugging_face_client,
+    "huggingface_base": base_hugging_face_client,
+    "huggingface_large": large_hugging_face_client,}
 
 collections = {
     "openai_small": openai_small_collection,
     "openai_large": openai_large_collection,
-    "small_hugging_face": bge_small_collection,
-    "base_hugging_face": bge_base_collection,
-    "large_hugging_face": bge_large_collection,
+    "huggingface_small": bge_small_collection,
+    "huggingface_base": bge_base_collection,
+    "huggingface_large": bge_large_collection,
 }

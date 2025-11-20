@@ -3,7 +3,20 @@ from typing import List
 from langchain_text_splitters import RecursiveCharacterTextSplitter, CharacterTextSplitter
 from langchain_core.documents.base import Document
 
-def chunk_document_elements_semantically(elements: List[Element], chunk_size: int = 1000, overlap: int = 200) -> List[Document]:
+def chunk_document(elements: List[Element], chunk_size: int = 1000, overlap: int = 200, chunking_strategy:str = "simple") -> List[Document]:
+    chunks: List[Document] = []
+    match chunking_strategy:
+        case "simple":
+            chunks = chunk_document_simply(elements, chunk_size, overlap)
+        case "recursive":
+            chunks = chunk_document_recursively(elements, chunk_size, overlap)
+        case "semantic":
+            chunks = chunk_document_semantically(elements, chunk_size, overlap)
+        case _:
+            raise ValueError(f"Unsupported chunking strategy: {chunking_strategy}")
+    return chunks
+
+def chunk_document_semantically(elements: List[Element], chunk_size: int = 1000, overlap: int = 200) -> List[Document]:
     sections: List[str] = group_related_elements(elements=elements)
     documents: List[Document] = []
     splitter = RecursiveCharacterTextSplitter(
@@ -24,9 +37,6 @@ def chunk_document_elements_semantically(elements: List[Element], chunk_size: in
     
     return documents
         
-            
-        
-    
 def chunk_document_recursively(elements: List[Element], chunk_size: int = 1000, overlap: int = 200) -> List[Document]:
     document: str = "\n\n".join([str(element.text) for element in elements if element.text])
     splitter = RecursiveCharacterTextSplitter(
@@ -74,8 +84,14 @@ def group_related_elements(elements: List[Element]) -> List[str]:
             while i<len(elements) and elements[i].category in ["Table", "ListItem"]:
                 current += f"{elements[i].text}\n" if elements[i].text else ""
                 i += 1
-        else:
-            current += f"{element.text}\n" if element.text else ""
+        elif type_of == "Table":
+            while i<len(elements) and elements[i].category == "Table":
+                current += f"{elements[i].text}\n" if elements[i].text else ""
+                i += 1
+        elif type_of == "ListItem":
+            while i<len(elements) and elements[i].category == "ListItem":
+                current += f"{elements[i].text}\n" if elements[i].text else ""
+                i += 1
         if current:
             sections.append(current)
             current = ""

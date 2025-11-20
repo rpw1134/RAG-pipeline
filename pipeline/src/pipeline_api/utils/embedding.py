@@ -12,19 +12,19 @@ def embed_chunks(chunks: List[Document], embedding_model: str) -> NDArray[np.flo
             embeddings = embed_openai(chunks, model="text-embedding-3-small")
         case "openai_large":
             embeddings = embed_openai(chunks, model="text-embedding-3-large")
-        case "small_hugging_face":
-            embeddings = embed_hugging_face(chunks, model="small_hugging_face")
-        case "base_hugging_face":
-            embeddings = embed_hugging_face(chunks, model="base_hugging_face")
-        case "large_hugging_face":
-            embeddings = embed_hugging_face(chunks, model="large_hugging_face")
+        case "huggingface_small":
+            embeddings = embed_hugging_face(chunks, model="huggingface_small")
+        case "huggingface_base":
+            embeddings = embed_hugging_face(chunks, model="huggingface_base")
+        case "huggingface_large":
+            embeddings = embed_hugging_face(chunks, model="huggingface_large")
         case _:
             raise ValueError(f"Unsupported embedding model: {embedding_model}")
     
     return np.array(embeddings, dtype=np.float32)
 
 def embed_openai(chunks: List[Document], model) -> List[List[float]]:
-    response = clients["openai_small"].create(
+    response = clients["openai"].create(
         input=[chunk.page_content for chunk in chunks],
         model=model
     )
