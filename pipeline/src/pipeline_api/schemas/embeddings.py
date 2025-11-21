@@ -11,3 +11,4 @@ class QueryEmbeddingRequest(BaseModel):
     rerank: bool = False
     num_queries: int = 10
     num_results: int = 5
+    include_metadata: bool = True
