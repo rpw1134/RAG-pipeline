@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from ..utils.db import query_top_k
 from ..utils.embedding import embed_texts
-from ..utils.reranking import rerank_documents
+from ..utils.reranking import rerank_documents, format_documents
 from ..types.embeddings import RerankerResponse
 from chromadb.api.types import QueryResult
 from ..schemas.embeddings import QueryEmbeddingRequest
@@ -18,5 +18,6 @@ async def query_endpoint(request: QueryEmbeddingRequest):
     docs_and_scores = RerankerResponse(documents=[], scores=[]) 
     if request.rerank:
         docs_and_scores: RerankerResponse = rerank_documents(request.query, query_results=context, k=request.num_results)
-        return {"results": docs_and_scores}
-    return {"results": context, "rerank": docs_and_scores}
+    else:
+        docs_and_scores: RerankerResponse = format_documents(context)
+    return {"results": docs_and_scores}

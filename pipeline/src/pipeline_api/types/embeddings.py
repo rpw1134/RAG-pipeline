@@ -1,4 +1,6 @@
 from dataclasses import dataclass
+from typing import List, Tuple
+
 
 @dataclass
 class QueryResponse():
@@ -10,5 +12,5 @@ class QueryResponse():
     
 @dataclass
 class RerankerResponse():
-    documents: list[str]
+    documents: List[Tuple[str, dict]]
     scores: list[float]
