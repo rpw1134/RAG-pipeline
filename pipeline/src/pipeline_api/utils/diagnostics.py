@@ -10,6 +10,10 @@ def perform_chunk_diagnostics(chunks: List[Document]) -> dict:
     Perform diagnostics on the provided chunks to calculate average chunk length,
     average cohesion score, and average separation score.
     
+    * Average Chunk Length: Precautionary measure. Extremes may indicate poor chunking and unreliable cohesion/separation scores.
+    * Cohesion Score: Measures how semantically similar sentences within a chunk are to each other. Higher scores indicate better cohesion.
+    * Separation Score: Measures how semantically different consecutive chunks are from each other. Lower scores indicate better separation.
+    
     Ideals:
     1. Chunk length: 500-1500
     2. Cohesion score: 0.7-1.0
@@ -56,3 +60,6 @@ def perform_chunk_diagnostics(chunks: List[Document]) -> dict:
         "average_cohesion_score": average_cohesion_score,
         "average_seperation_score": average_seperation_score
     }
+    
+def perform_synthetic_query_diagnostics(chunks: List[Document], embedding_model):
+    pass
