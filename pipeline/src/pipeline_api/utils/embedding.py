@@ -36,19 +36,19 @@ def embed_hugging_face(chunks: List[Document], model: str) -> List[List[float]]:
     embeddings = hf_client.encode(texts, normalize_embeddings=True).tolist()
     return embeddings
 
-def embed_texts(texts: List[str], embedding_model: str) -> NDArray[np.float32]:
+def embed_texts(text: str, embedding_model: str) -> NDArray[np.float32]:
     embeddings: List[List[float]] = []
     match embedding_model:
         case "openai_small":
-            embeddings = embed_text_openai(texts, model="text-embedding-3-small")
+            embeddings = embed_text_openai([text], model="text-embedding-3-small")
         case "openai_large":
-            embeddings = embed_text_openai(texts, model="text-embedding-3-large")
+            embeddings = embed_text_openai([text], model="text-embedding-3-large")
         case "huggingface_small":
-            embeddings = embed_text_hugging_face(texts, model="huggingface_small")
+            embeddings = embed_text_hugging_face([text], model="huggingface_small")
         case "huggingface_base":
-            embeddings = embed_text_hugging_face(texts, model="huggingface_base")
+            embeddings = embed_text_hugging_face([text], model="huggingface_base")
         case "huggingface_large":
-            embeddings = embed_text_hugging_face(texts, model="huggingface_large")
+            embeddings = embed_text_hugging_face([text], model="huggingface_large")
         case _:
             raise ValueError(f"Unsupported embedding model: {embedding_model}") 
     return np.array(embeddings, dtype=np.float32)

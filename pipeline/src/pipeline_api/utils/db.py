@@ -5,6 +5,7 @@ from uuid import uuid4 as uuid
 from numpy.typing import NDArray
 import numpy as np
 from typing import List
+from chromadb.api.types import QueryResult
 
 def add_vectors(collection_name: str, embeddings: NDArray[np.float32], documents: list[Document]):
     collection: Collection = collections[collection_name]
@@ -15,7 +16,7 @@ def add_vectors(collection_name: str, embeddings: NDArray[np.float32], documents
         metadatas=[document.metadata for document in documents],
     )
     
-def query_top_k(collection_name: str, embedding: NDArray[np.float32], k:int):
+def query_top_k(collection_name: str, embedding: NDArray[np.float32], k:int) -> QueryResult:
     collection: Collection = collections[collection_name]
     results = collection.query(
         query_embeddings=embedding,

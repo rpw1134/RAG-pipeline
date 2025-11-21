@@ -6,5 +6,7 @@ class FileEmbeddingRequest(BaseModel):
     chunking_strategy: str
     
 class QueryEmbeddingRequest(BaseModel):
-    queries: List[str]
+    query: str
     model: str
+    rerank: bool = False
+    num_results: int = 5
