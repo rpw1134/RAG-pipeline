@@ -9,4 +9,5 @@ class QueryEmbeddingRequest(BaseModel):
     query: str
     model: str
     rerank: bool = False
+    num_queries: int = 10
     num_results: int = 5

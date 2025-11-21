@@ -14,7 +14,7 @@ router = APIRouter(
 @router.post("/")
 async def query_endpoint(request: QueryEmbeddingRequest):
     embeddings = embed_texts(request.query, embedding_model=request.model)
-    context: QueryResult = query_top_k(collection_name=request.model, embedding=embeddings, k=request.num_results)
+    context: QueryResult = query_top_k(collection_name=request.model, embedding=embeddings, k=request.num_queries)
     docs_and_scores = RerankerResponse(documents=[], scores=[]) 
     if request.rerank:
         docs_and_scores: RerankerResponse = rerank_documents(request.query, query_results=context, k=request.num_results)
