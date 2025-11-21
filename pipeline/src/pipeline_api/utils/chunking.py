@@ -2,8 +2,18 @@ from unstructured.documents.elements import Element
 from typing import List
 from langchain_text_splitters import RecursiveCharacterTextSplitter, CharacterTextSplitter
 from langchain_core.documents.base import Document
+from fastapi import HTTPException, status
 
-def chunk_document(elements: List[Element], chunk_size: int = 1000, overlap: int = 200, chunking_strategy:str = "simple") -> List[Document]:
+def chunk_document(elements: List[Element], chunk_size: int = 1000, overlap: int = 200, chunking_strategy: str = "simple") -> List[Document]:
+    if not elements:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No elements provided for chunking")
+    if chunk_size <= 0:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="chunk_size must be a positive integer")
+    if overlap < 0:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="overlap must be non-negative")
+    if overlap >= chunk_size:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="overlap must be less than chunk_size")
+
     chunks: List[Document] = []
     match chunking_strategy:
         case "simple":
@@ -13,7 +23,11 @@ def chunk_document(elements: List[Element], chunk_size: int = 1000, overlap: int
         case "semantic":
             chunks = chunk_document_semantically(elements, chunk_size, overlap)
         case _:
-            raise ValueError(f"Unsupported chunking strategy: {chunking_strategy}")
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unsupported chunking strategy: {chunking_strategy}")
+
+    if not chunks:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="No chunks could be created from the provided elements")
+
     return chunks
 
 def chunk_document_semantically(elements: List[Element], chunk_size: int = 1000, overlap: int = 200) -> List[Document]:

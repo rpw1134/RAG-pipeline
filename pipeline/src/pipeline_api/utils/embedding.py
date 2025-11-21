@@ -4,8 +4,11 @@ from .clients import clients
 from sentence_transformers import SentenceTransformer
 import numpy as np
 from numpy.typing import NDArray
+from fastapi import HTTPException, status
 
 def embed_chunks(chunks: List[Document], embedding_model: str) -> NDArray[np.float32]:
+    if not chunks:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No chunks provided for embedding")
     embeddings: List[List[float]] = []
     match embedding_model:
         case "openai_small":
@@ -19,7 +22,7 @@ def embed_chunks(chunks: List[Document], embedding_model: str) -> NDArray[np.flo
         case "huggingface_large":
             embeddings = embed_hugging_face(chunks, model="huggingface_large")
         case _:
-            raise ValueError(f"Unsupported embedding model: {embedding_model}")
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unsupported embedding model: {embedding_model}")
     
     return np.array(embeddings, dtype=np.float32)
 
@@ -37,6 +40,8 @@ def embed_hugging_face(chunks: List[Document], model: str) -> List[List[float]]:
     return embeddings
 
 def embed_texts(text: str, embedding_model: str) -> NDArray[np.float32]:
+    if not text or not text.strip():
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No text provided for embedding")
     embeddings: List[List[float]] = []
     match embedding_model:
         case "openai_small":
@@ -50,7 +55,7 @@ def embed_texts(text: str, embedding_model: str) -> NDArray[np.float32]:
         case "huggingface_large":
             embeddings = embed_text_hugging_face([text], model="huggingface_large")
         case _:
-            raise ValueError(f"Unsupported embedding model: {embedding_model}") 
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unsupported embedding model: {embedding_model}") 
     return np.array(embeddings, dtype=np.float32)
 
 def embed_text_openai(texts: List[str], model) -> List[List[float]]:

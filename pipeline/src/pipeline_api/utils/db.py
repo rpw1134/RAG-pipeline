@@ -6,8 +6,18 @@ from numpy.typing import NDArray
 import numpy as np
 from typing import List
 from chromadb.api.types import QueryResult
+from fastapi import HTTPException, status
 
 def add_vectors(collection_name: str, embeddings: NDArray[np.float32], documents: list[Document]):
+    if collection_name not in collections:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unknown collection: {collection_name}")
+    if len(embeddings) == 0:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No embeddings provided")
+    if len(documents) == 0:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No documents provided")
+    if len(embeddings) != len(documents):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Embeddings count ({len(embeddings)}) does not match documents count ({len(documents)})")
+
     collection: Collection = collections[collection_name]
     collection.add(
         ids=[str(uuid()) for i in range(len(embeddings))],
@@ -15,8 +25,13 @@ def add_vectors(collection_name: str, embeddings: NDArray[np.float32], documents
         documents=[document.page_content for document in documents],
         metadatas=[document.metadata for document in documents],
     )
-    
-def query_top_k(collection_name: str, embedding: NDArray[np.float32], k:int) -> QueryResult:
+
+def query_top_k(collection_name: str, embedding: NDArray[np.float32], k: int) -> QueryResult:
+    if collection_name not in collections:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unknown collection: {collection_name}")
+    if k <= 0:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="k must be a positive integer")
+
     collection: Collection = collections[collection_name]
     results = collection.query(
         query_embeddings=embedding,
