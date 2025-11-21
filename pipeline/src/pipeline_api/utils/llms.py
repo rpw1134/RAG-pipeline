@@ -1,13 +1,12 @@
 from .clients import openai_client
 from ..types.embeddings import RerankerResponse
-from .constants import SYSTEM_PROMPT_BASE
+from .constants import SYSTEM_PROMPT_BASE, SUPPORTED_MODELS
 from typing import List
 import json
 from fastapi import HTTPException, status
 
-SUPPORTED_MODELS = ["gpt-4", "gpt-4-turbo", "gpt-4o", "gpt-4o-mini", "gpt-3.5-turbo"]
 
-def send_chat_request(query: str, context: RerankerResponse, include_metadatas: bool, model: str = "gpt-4") -> str:
+def send_chat_request(query: str, context: RerankerResponse, include_metadatas: bool, model: str = "gpt-4") -> List[str | float]:
     if not query or not query.strip():
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No query provided")
     if not context.documents:
@@ -30,7 +29,7 @@ def send_chat_request(query: str, context: RerankerResponse, include_metadatas: 
             model=model,
             messages=messages,
             temperature=0.7,
-            max_tokens=500
+            max_tokens=1000
         )
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=f"OpenAI API error: {str(e)}")
@@ -38,7 +37,14 @@ def send_chat_request(query: str, context: RerankerResponse, include_metadatas: 
     if not response.choices or not response.choices[0].message.content:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="No content in chat completion response")
 
-    return response.choices[0].message.content
+    res = response.choices[0].message.content
+    confidence_score = res.split("Confidence Score:")[-1].strip().split("\n")[0].strip()
+    res = res.split("Confidence Score:")[0].strip()
+    try:
+        score_value = float(confidence_score)
+    except ValueError:
+        score_value = -1.0
+    return [res, score_value]
 
 
 def construct_context_strings_with_metadatas(context: RerankerResponse) -> List[str]:

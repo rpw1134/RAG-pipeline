@@ -22,4 +22,4 @@ async def query_endpoint(request: QueryEmbeddingRequest):
     else:
         docs_and_scores: RerankerResponse = format_documents(context)
     llm_response = send_chat_request(request.query, context=docs_and_scores, include_metadatas=request.include_metadata, model=request.llm_model)
-    return {"results": docs_and_scores}
+    return {"llm_response": llm_response[0], "confidence_score":llm_response[1], "context_returned": docs_and_scores.documents, "context_scores": docs_and_scores.scores}

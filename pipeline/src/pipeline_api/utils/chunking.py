@@ -3,6 +3,7 @@ from typing import List
 from langchain_text_splitters import RecursiveCharacterTextSplitter, CharacterTextSplitter
 from langchain_core.documents.base import Document
 from fastapi import HTTPException, status
+from ..utils.clients import clients
 
 def chunk_document(elements: List[Element], chunk_size: int = 1000, overlap: int = 200, chunking_strategy: str = "simple") -> List[Document]:
     if not elements:
@@ -20,8 +21,8 @@ def chunk_document(elements: List[Element], chunk_size: int = 1000, overlap: int
             chunks = chunk_document_simply(elements, chunk_size, overlap)
         case "recursive":
             chunks = chunk_document_recursively(elements, chunk_size, overlap)
-        case "semantic":
-            chunks = chunk_document_semantically(elements, chunk_size, overlap)
+        case "structural":
+            chunks = chunk_document_by_structure(elements, chunk_size, overlap)
         case _:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unsupported chunking strategy: {chunking_strategy}")
 
@@ -29,8 +30,9 @@ def chunk_document(elements: List[Element], chunk_size: int = 1000, overlap: int
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="No chunks could be created from the provided elements")
 
     return chunks
+    
 
-def chunk_document_semantically(elements: List[Element], chunk_size: int = 1000, overlap: int = 200) -> List[Document]:
+def chunk_document_by_structure(elements: List[Element], chunk_size: int = 1000, overlap: int = 200) -> List[Document]:
     sections: List[str] = group_related_elements(elements=elements)
     documents: List[Document] = []
     splitter = RecursiveCharacterTextSplitter(
