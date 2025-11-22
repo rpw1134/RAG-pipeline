@@ -1,9 +1,10 @@
 from typing import List
 from langchain_core.documents.base import Document
-from .clients import base_hugging_face_client
+from .clients import base_hugging_face_client, openai_client
 import numpy as np
-
-
+import random
+from .constants import SYNTHETIC_EVALUATION_PROMPT
+import json
 
 def perform_chunk_diagnostics(chunks: List[Document]) -> dict:
     '''
@@ -61,5 +62,27 @@ def perform_chunk_diagnostics(chunks: List[Document]) -> dict:
         "average_seperation_score": average_seperation_score
     }
     
-def perform_synthetic_query_diagnostics(chunks: List[Document], embedding_model):
-    pass
+def perform_synthetic_query_diagnostics(chunks: List[Document], embedding_model, num_chunks: int = 8):
+    testable_chunks = random.choices(chunks, k=num_chunks)
+    testable_chunks = [f"{i}: {chunk.page_content}" for i, chunk in enumerate(testable_chunks)]
+    chunks_string = "\n\n".join(testable_chunks)
+    reply = openai_client.chat.completions.create(
+        model="gpt-4",
+        messages=[
+            {
+                "role": "system",
+                "content": SYNTHETIC_EVALUATION_PROMPT + "\n\n" + chunks_string
+            },
+        ]
+    )
+    if not reply.choices or not reply.choices[0].message.content:
+        return {"error": "No content in chat completion response"}
+    response = reply.choices[0].message.content
+    try:
+        response = json.loads(response)
+        print(response)
+    except json.JSONDecodeError:
+        return {"error": "Response is not valid JSON", "response": response}
+    return {"response": response}
+    
+    

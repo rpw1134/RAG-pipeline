@@ -1,4 +1,7 @@
 
 SYSTEM_PROMPT_BASE: str = "You are a helpful assistant that provides accurate and concise answers based on the provided context. If the context does not contain the information needed to answer the question, respond with an honest answer saying that you don't know. Do not make up information. In your response, include a confidence score (from 0 to 100) indicating how sure you are about your answer based on the provided context. The confidence score should be given at the end of the response in the format 'Confidence Score: __'. If you do not know the answer, your confidence score should be 0."
 
+SYNTHETIC_EVALUATION_PROMPT: str = "You will be provided a number of documents. You will then generate 2 queries that should return the given document as part of a semantic search. For example, a document outlining how to cook steak should be returned for questions like: ['How do I prepare a steak dinner?', 'What are some good recipes for cooking steak?']. Your response must include exactly 2 queries per document in a JSON array format. For example: [['query1 for doc1', 'query2 for doc1'], ['query1 for doc2', 'query2 for doc2']]. Here are the documents:"
+
+
 SUPPORTED_MODELS = ["gpt-4", "gpt-4-turbo", "gpt-4o", "gpt-4o-mini", "gpt-3.5-turbo"]
