@@ -6,6 +6,7 @@ from sentence_transformers import SentenceTransformer
 import numpy as np
 from numpy.typing import NDArray
 from fastapi import HTTPException, status
+from ..utils.reranking import format_documents
 
 def embed_chunks(chunks: List[Document], embedding_model: str) -> NDArray[np.float32]:
     if not chunks:
@@ -112,9 +113,9 @@ def evaluate_synthetic_queries(queries: List[List[str]], documents: List[str], e
             if not returned_documents:
                 raise ValueError("No embedded documents")
             
-            returned_documents = returned_documents[0] if results.get("documents") else []
+            returned_documents = format_documents(results)
 
-            if expected_document in returned_documents:
+            if expected_document in list(map(lambda doc: doc[0], returned_documents.documents)):
                 hits += 1
                 doc_hits += 1
             else:

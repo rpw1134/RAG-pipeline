@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from ..utils.db import query_top_k
-from ..utils.embedding import embed_texts
+from ..utils.embeddings import embed_texts
 from ..utils.reranking import rerank_documents, format_documents
 from ..utils.llms import send_chat_request
 from ..types.embeddings import RerankerResponse

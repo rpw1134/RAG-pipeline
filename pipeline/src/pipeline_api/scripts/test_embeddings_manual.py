@@ -7,7 +7,7 @@ import dotenv
 dotenv.load_dotenv()
 
 from langchain_core.documents.base import Document
-from ..utils.embedding import embed_chunks, embed_openai, embed_hugging_face
+from ..utils.embeddings import embed_chunks, embed_openai, embed_hugging_face
 
 print("Loaded environment variables from .env file")
 def main():

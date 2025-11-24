@@ -1,6 +1,7 @@
 from typing import List
 from langchain_core.documents.base import Document
 from .clients import base_hugging_face_client, openai_client
+from .embeddings import evaluate_synthetic_queries
 import numpy as np
 import random
 from .constants import SYNTHETIC_EVALUATION_PROMPT
@@ -64,8 +65,11 @@ def perform_chunk_diagnostics(chunks: List[Document]) -> dict:
     
 def perform_synthetic_query_diagnostics(chunks: List[Document], embedding_model, num_chunks: int = 8):
     testable_chunks = random.choices(chunks, k=num_chunks)
-    testable_chunks = [f"{i}: {chunk.page_content}" for i, chunk in enumerate(testable_chunks)]
-    chunks_string = "\n\n".join(testable_chunks)
+    # Keep original page_content for DB comparison
+    original_contents = [chunk.page_content for chunk in testable_chunks]
+    # Add index prefix only for LLM prompt
+    indexed_chunks = [f"{i}: {chunk.page_content}" for i, chunk in enumerate(testable_chunks)]
+    chunks_string = "\n\n".join(indexed_chunks)
     reply = openai_client.chat.completions.create(
         model="gpt-4",
         messages=[
@@ -80,9 +84,11 @@ def perform_synthetic_query_diagnostics(chunks: List[Document], embedding_model,
     response = reply.choices[0].message.content
     try:
         response = json.loads(response)
-        print(response)
     except json.JSONDecodeError:
         return {"error": "Response is not valid JSON", "response": response}
+    # Pass original contents (without index prefix) for DB comparison
+    res = evaluate_synthetic_queries(queries=response, documents=original_contents, embedding_model=embedding_model)
+    print(res)
     return {"response": response}
     
     
