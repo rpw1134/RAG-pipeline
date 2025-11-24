@@ -26,7 +26,7 @@ async def list_collections(active_only: bool = Query(True, description="If true,
 async def delete_collection(collection_name: str):
     if collection_name in collections:
         collection = collections[collection_name]
-        collection.delete()
+        collection.delete(where={"chunk": {"$ne": "non_existent_value"}})
         return {"detail": f"Collection {collection_name} cleared"}
     else:
         return {"detail": f"Collection {collection_name} does not exist"}

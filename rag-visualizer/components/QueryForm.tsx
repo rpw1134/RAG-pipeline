@@ -3,12 +3,12 @@ import { EMBEDDING_MODELS, LLM_MODELS } from "@/app/utils/constants";
 
 export interface QueryFormState {
   query: string;
-  embeddingModel: string;
-  llmModel: string;
+  embedding_model: string;
+  llm_model: string;
   rerank: boolean;
-  numQueries: number;
-  numResults: number;
-  includeMetadata: boolean;
+  num_queries: number;
+  num_results: number;
+  include_metadata: boolean;
 }
 
 interface QueryFormProps {
@@ -37,15 +37,15 @@ export function QueryForm({
 
       <Select
         label="Embedding Model"
-        value={state.embeddingModel}
-        onChange={(embeddingModel) => update({ embeddingModel })}
+        value={state.embedding_model}
+        onChange={(embedding_model) => update({ embedding_model })}
         options={EMBEDDING_MODELS}
       />
 
       <Select
         label="LLM Model"
-        value={state.llmModel}
-        onChange={(llmModel) => update({ llmModel })}
+        value={state.llm_model}
+        onChange={(llm_model) => update({ llm_model })}
         options={LLM_MODELS}
       />
 
@@ -58,24 +58,24 @@ export function QueryForm({
       <div className="grid grid-cols-2 gap-4">
         <NumberInput
           label="Documents to Retrieve from Database"
-          value={state.numQueries}
-          onChange={(numQueries) => update({ numQueries })}
+          value={state.num_queries}
+          onChange={(num_queries) => update({ num_queries })}
         />
 
         {state.rerank && (
           <NumberInput
             label="Returned Documents After Rerank"
-            value={state.numResults}
-            onChange={(numResults) => update({ numResults })}
-            max={state.numQueries}
+            value={state.num_results}
+            onChange={(num_results) => update({ num_results })}
+            max={state.num_queries}
           />
         )}
       </div>
 
       <Checkbox
         label="Include Metadata"
-        checked={state.includeMetadata}
-        onChange={(includeMetadata) => update({ includeMetadata })}
+        checked={state.include_metadata}
+        onChange={(include_metadata) => update({ include_metadata })}
       />
     </div>
   );

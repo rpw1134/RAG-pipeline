@@ -23,12 +23,12 @@ const initialDiagnosticsState: DiagnosticsFormState = {
 
 const initialQueryState: QueryFormState = {
   query: "",
-  embeddingModel: "huggingface_small",
-  llmModel: "gpt-4o",
+  embedding_model: "huggingface_small",
+  llm_model: "gpt-4o",
   rerank: false,
-  numQueries: 10,
-  numResults: 5,
-  includeMetadata: false,
+  num_queries: 10,
+  num_results: 5,
+  include_metadata: false,
 };
 
 export default function Home() {
