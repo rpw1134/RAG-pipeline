@@ -1,71 +1,71 @@
 import { Select, Checkbox, NumberInput } from "@/components/ui";
-
-const EMBEDDING_MODELS = [
-  { value: "text-embedding-3-small", label: "text-embedding-3-small" },
-  { value: "text-embedding-3-large", label: "text-embedding-3-large" },
-  { value: "text-embedding-ada-002", label: "text-embedding-ada-002" },
-];
-
-const CHUNKING_STRATEGIES = [
-  { value: "recursive", label: "Recursive" },
-  { value: "semantic", label: "Semantic" },
-  { value: "fixed", label: "Fixed" },
-  { value: "sentence", label: "Sentence" },
-  { value: "paragraph", label: "Paragraph" },
-];
+import { EMBEDDING_MODELS, CHUNKING_STRATEGIES } from "@/app/utils/constants";
 
 export interface DiagnosticsFormState {
-  embeddingModel: string;
-  chunkingStrategy: string;
-  runChunkDiagnostics: boolean;
-  runSyntheticQuery: boolean;
+  model: string;
+  chunking_strategy: string;
+  run_chunk_diagnostics: boolean;
+  run_synthetic_query_diagnostics: boolean;
+  num_results: number;
+  num_rerank: number;
   rerank: boolean;
-  rerankReturnNumber: number;
-  queryResponseNumber: number;
 }
 
 interface DiagnosticsFormProps {
   state: DiagnosticsFormState;
   onChange: (state: DiagnosticsFormState) => void;
+  compact?: boolean;
 }
 
-export function DiagnosticsForm({ state, onChange }: DiagnosticsFormProps) {
+export function DiagnosticsForm({
+  state,
+  onChange,
+  compact = false,
+}: DiagnosticsFormProps) {
   const update = (partial: Partial<DiagnosticsFormState>) => {
     onChange({ ...state, ...partial });
   };
 
   return (
-    <div className="space-y-5">
+    <div className={compact ? "space-y-3" : "space-y-5"}>
       <Select
         label="Embedding Model"
-        value={state.embeddingModel}
-        onChange={(embeddingModel) => update({ embeddingModel })}
+        value={state.model}
+        onChange={(model) => update({ model })}
         options={EMBEDDING_MODELS}
       />
 
       <Select
         label="Chunking Strategy"
-        value={state.chunkingStrategy}
-        onChange={(chunkingStrategy) => update({ chunkingStrategy })}
+        value={state.chunking_strategy}
+        onChange={(chunking_strategy) => update({ chunking_strategy })}
         options={CHUNKING_STRATEGIES}
       />
 
       <div className="space-y-3">
         <Checkbox
           label="Run Chunk Diagnostics"
-          checked={state.runChunkDiagnostics}
-          onChange={(runChunkDiagnostics) => update({ runChunkDiagnostics })}
+          checked={state.run_chunk_diagnostics}
+          onChange={(run_chunk_diagnostics) =>
+            update({ run_chunk_diagnostics })
+          }
         />
 
         <Checkbox
           label="Run Synthetic Query Diagnostics"
-          checked={state.runSyntheticQuery}
-          onChange={(runSyntheticQuery) => update({ runSyntheticQuery })}
+          checked={state.run_synthetic_query_diagnostics}
+          onChange={(run_synthetic_query_diagnostics) =>
+            update({ run_synthetic_query_diagnostics })
+          }
         />
       </div>
 
-      {state.runSyntheticQuery && (
-        <div className="space-y-4 rounded-lg border border-border bg-surface p-4">
+      {state.run_synthetic_query_diagnostics && (
+        <div
+          className={`rounded-lg border border-border bg-surface ${
+            compact ? "space-y-3 p-3" : "space-y-4 p-4"
+          }`}
+        >
           <Checkbox
             label="Enable Reranking"
             checked={state.rerank}
@@ -74,16 +74,17 @@ export function DiagnosticsForm({ state, onChange }: DiagnosticsFormProps) {
 
           {state.rerank && (
             <NumberInput
-              label="Rerank Return Number"
-              value={state.rerankReturnNumber}
-              onChange={(rerankReturnNumber) => update({ rerankReturnNumber })}
+              label="Returned Documents After Rerank"
+              value={state.num_rerank}
+              onChange={(num_rerank) => update({ num_rerank })}
+              max={state.num_results}
             />
           )}
 
           <NumberInput
-            label="Query Response Number"
-            value={state.queryResponseNumber}
-            onChange={(queryResponseNumber) => update({ queryResponseNumber })}
+            label="Number of Documents to Retrieve"
+            value={state.num_results}
+            onChange={(num_results) => update({ num_results })}
           />
         </div>
       )}

@@ -1,11 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { FileUpload, Button } from "@/components/ui";
 import {
-  ModeToggle,
-  DiagnosticsForm,
-  QueryForm,
+  ConfigPanel,
+  StatsPanel,
+  CollectionStatus,
   type DiagnosticsFormState,
   type QueryFormState,
 } from "@/components";
@@ -13,22 +12,22 @@ import {
 type Mode = "diagnostics" | "query";
 
 const initialDiagnosticsState: DiagnosticsFormState = {
-  embeddingModel: "text-embedding-3-small",
-  chunkingStrategy: "recursive",
-  runChunkDiagnostics: false,
-  runSyntheticQuery: false,
+  model: "huggingface_small",
+  chunking_strategy: "recursive",
+  run_chunk_diagnostics: false,
+  run_synthetic_query_diagnostics: false,
   rerank: false,
-  rerankReturnNumber: 5,
-  queryResponseNumber: 10,
+  num_rerank: 5,
+  num_results: 10,
 };
 
 const initialQueryState: QueryFormState = {
   query: "",
-  embeddingModel: "text-embedding-3-small",
+  embeddingModel: "huggingface_small",
   llmModel: "gpt-4o",
   rerank: false,
-  numQueries: 5,
-  numResults: 10,
+  numQueries: 10,
+  numResults: 5,
   includeMetadata: false,
 };
 
@@ -39,52 +38,60 @@ export default function Home() {
     initialDiagnosticsState
   );
   const [queryState, setQueryState] = useState(initialQueryState);
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const formData =
-      mode === "diagnostics"
-        ? { mode, file: selectedFile?.name, ...diagnosticsState }
-        : { mode, file: selectedFile?.name, ...queryState };
+    const formData = mode === "diagnostics" ? diagnosticsState : queryState;
     console.log(formData);
+    setIsSubmitted(true);
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <div className="mx-auto max-w-2xl px-6 py-12">
-        <header className="mb-10 text-center">
-          <h1 className="text-3xl font-bold tracking-tight">
-            <span className="text-accent">RAG</span> Pipeline
-          </h1>
-          <p className="mt-2 text-muted">
-            Diagnose and query your document pipeline
-          </p>
-        </header>
+    <div className="relative min-h-screen bg-background text-foreground">
+      {/* Collection Status - always visible in top right */}
+      <CollectionStatus className="fixed top-4 right-4 z-10" />
 
-        <ModeToggle mode={mode} onModeChange={setMode} />
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {mode === "diagnostics" && (
-            <FileUpload
+      {!isSubmitted ? (
+        // Centered layout before submission
+        <div className="mx-auto max-w-2xl px-6 py-12">
+          <ConfigPanel
+            mode={mode}
+            onModeChange={setMode}
+            selectedFile={selectedFile}
+            onFileSelect={setSelectedFile}
+            diagnosticsState={diagnosticsState}
+            onDiagnosticsChange={setDiagnosticsState}
+            queryState={queryState}
+            onQueryChange={setQueryState}
+            onSubmit={handleSubmit}
+          />
+        </div>
+      ) : (
+        // Split layout after submission
+        <div className="flex min-h-screen">
+          {/* Left sidebar - Config panel */}
+          <aside className="w-80 shrink-0 border-r border-border bg-surface p-4 overflow-y-auto">
+            <ConfigPanel
+              compact
+              mode={mode}
+              onModeChange={setMode}
               selectedFile={selectedFile}
               onFileSelect={setSelectedFile}
+              diagnosticsState={diagnosticsState}
+              onDiagnosticsChange={setDiagnosticsState}
+              queryState={queryState}
+              onQueryChange={setQueryState}
+              onSubmit={handleSubmit}
             />
-          )}
+          </aside>
 
-          {mode === "diagnostics" ? (
-            <DiagnosticsForm
-              state={diagnosticsState}
-              onChange={setDiagnosticsState}
-            />
-          ) : (
-            <QueryForm state={queryState} onChange={setQueryState} />
-          )}
-
-          <Button type="submit">
-            {mode === "diagnostics" ? "Run Diagnostics" : "Submit Query"}
-          </Button>
-        </form>
-      </div>
+          {/* Right content - Stats panel */}
+          <main className="flex-1 pl-4 overflow-y-auto">
+            <StatsPanel mode={mode} />
+          </main>
+        </div>
+      )}
     </div>
   );
 }

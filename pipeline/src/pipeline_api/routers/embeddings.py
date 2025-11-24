@@ -30,11 +30,3 @@ async def embed_document(file: UploadFile, config: str = Form(...)):
     
     return {"diagnostics": diagnostics, "num_chunks": len(chunks)}
 
-@router.delete("/collection/{collection_name}")
-async def delete_collection(collection_name: str):
-    if collection_name in collections:
-        collection = collections[collection_name]
-        collection.delete()
-        return {"detail": f"Collection {collection_name} cleared"}
-    else:
-        return {"detail": f"Collection {collection_name} does not exist"}

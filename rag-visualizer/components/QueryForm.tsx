@@ -1,17 +1,5 @@
 import { Select, Checkbox, NumberInput, TextArea } from "@/components/ui";
-
-const EMBEDDING_MODELS = [
-  { value: "text-embedding-3-small", label: "text-embedding-3-small" },
-  { value: "text-embedding-3-large", label: "text-embedding-3-large" },
-  { value: "text-embedding-ada-002", label: "text-embedding-ada-002" },
-];
-
-const LLM_MODELS = [
-  { value: "gpt-4o", label: "gpt-4o" },
-  { value: "gpt-4o-mini", label: "gpt-4o-mini" },
-  { value: "gpt-4-turbo", label: "gpt-4-turbo" },
-  { value: "gpt-3.5-turbo", label: "gpt-3.5-turbo" },
-];
+import { EMBEDDING_MODELS, LLM_MODELS } from "@/app/utils/constants";
 
 export interface QueryFormState {
   query: string;
@@ -26,15 +14,20 @@ export interface QueryFormState {
 interface QueryFormProps {
   state: QueryFormState;
   onChange: (state: QueryFormState) => void;
+  compact?: boolean;
 }
 
-export function QueryForm({ state, onChange }: QueryFormProps) {
+export function QueryForm({
+  state,
+  onChange,
+  compact = false,
+}: QueryFormProps) {
   const update = (partial: Partial<QueryFormState>) => {
     onChange({ ...state, ...partial });
   };
 
   return (
-    <div className="space-y-5">
+    <div className={compact ? "space-y-3" : "space-y-5"}>
       <TextArea
         label="Query"
         value={state.query}
@@ -64,16 +57,17 @@ export function QueryForm({ state, onChange }: QueryFormProps) {
 
       <div className="grid grid-cols-2 gap-4">
         <NumberInput
-          label="Number of Queries"
+          label="Documents to Retrieve from Database"
           value={state.numQueries}
           onChange={(numQueries) => update({ numQueries })}
         />
 
         {state.rerank && (
           <NumberInput
-            label="Number of Results"
+            label="Returned Documents After Rerank"
             value={state.numResults}
             onChange={(numResults) => update({ numResults })}
+            max={state.numQueries}
           />
         )}
       </div>
