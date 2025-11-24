@@ -22,6 +22,7 @@ interface ConfigPanelProps {
   queryState: QueryFormState;
   onQueryChange: (state: QueryFormState) => void;
   onSubmit: (e: React.FormEvent) => void;
+  isPondering?: boolean;
 }
 
 export function ConfigPanel({
@@ -35,6 +36,7 @@ export function ConfigPanel({
   queryState,
   onQueryChange,
   onSubmit,
+  isPondering = false,
 }: ConfigPanelProps) {
   return (
     <div className={compact ? "mt-4 space-y-4" : "space-y-6"}>
@@ -57,6 +59,7 @@ export function ConfigPanel({
             selectedFile={selectedFile}
             onFileSelect={onFileSelect}
             compact={compact}
+            required
           />
         )}
 
@@ -74,11 +77,13 @@ export function ConfigPanel({
           />
         )}
 
-        <Button type="submit">
+        <Button
+          type="submit"
+          isPondering={isPondering}
+          disabled={mode === "diagnostics" && !selectedFile}
+        >
           {mode === "diagnostics"
-            ? compact
-              ? "Re-run"
-              : "Upload Context & Run Diagnostics"
+            ? "Upload Context & Run Diagnostics"
             : "Submit Query"}
         </Button>
       </form>

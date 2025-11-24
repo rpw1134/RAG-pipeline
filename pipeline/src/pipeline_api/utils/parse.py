@@ -1,8 +1,15 @@
+import warnings
+import logging
+
 from unstructured.partition.pdf import partition_pdf
 from unstructured.documents.elements import Element
 from typing import BinaryIO as File
 from typing import List
 from fastapi import HTTPException, status
+
+# Suppress pdfminer FontBBox warnings
+warnings.filterwarnings("ignore", message=".*FontBBox.*")
+logging.getLogger("pdfminer").setLevel(logging.ERROR)
 
 
 def parse_pdf(file: File) -> List[Element]:

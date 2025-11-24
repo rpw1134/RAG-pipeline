@@ -7,13 +7,15 @@ interface FileUploadProps {
   onFileSelect: (file: File) => void;
   accept?: string;
   compact?: boolean;
+  required?: boolean;
 }
 
 export function FileUpload({
   selectedFile,
   onFileSelect,
-  accept = ".pdf,.txt,.md,.docx",
+  accept = ".pdf",
   compact = false,
+  required = false,
 }: FileUploadProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -30,7 +32,9 @@ export function FileUpload({
 
   return (
     <div>
-      <label className="mb-2 block text-sm font-medium">Document File</label>
+      <label className="mb-2 block text-sm font-medium">
+        Document File{required && <span className="text-accent ml-1">*</span>}
+      </label>
       <div
         onClick={() => fileInputRef.current?.click()}
         onDrop={handleFileDrop}
@@ -65,7 +69,7 @@ export function FileUpload({
             </span>
             {!compact && (
               <span className="mt-1 text-xs text-muted">
-                PDF, TXT, MD, or DOCX
+                PDF only
               </span>
             )}
           </>

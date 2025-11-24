@@ -39,18 +39,54 @@ export default function Home() {
   );
   const [queryState, setQueryState] = useState(initialQueryState);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isPondering, setIsPondering] = useState(false);
+  const [collectionRefresh, setCollectionRefresh] = useState(0);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleConfigSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const formData = mode === "diagnostics" ? diagnosticsState : queryState;
-    console.log(formData);
-    setIsSubmitted(true);
+    setIsPondering(true);
+
+    try {
+      let response;
+      const formData = new FormData();
+      const config = mode === "diagnostics" ? diagnosticsState : queryState;
+      if (mode === "diagnostics") {
+        const file = mode === "diagnostics" ? selectedFile : null;
+        if (file) {
+          formData.append("file", file);
+        }
+        formData.append("config", JSON.stringify(config));
+        console.log("Submitting config:", config);
+        console.log("Submitting file:", file);
+        response = await fetch("http://localhost:8000/embeddings/documents", {
+          method: "POST",
+          body: formData,
+        });
+      } else {
+        // Send JSON for query mode — stringify the config and set Content-Type header
+        response = await fetch("http://localhost:8000/queries", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(config),
+        });
+      }
+      const data = await response.json();
+      console.log(data);
+      setCollectionRefresh((prev) => prev + 1);
+      setIsSubmitted(true);
+    } catch (error) {
+      console.error("Error submitting:", error);
+    } finally {
+      setIsPondering(false);
+    }
   };
 
   return (
     <div className="relative min-h-screen bg-background text-foreground">
       {/* Collection Status - always visible in top right */}
-      <CollectionStatus className="fixed top-4 right-4 z-10" />
+      <CollectionStatus className="fixed top-4 right-4 z-10" refreshTrigger={collectionRefresh} />
 
       {!isSubmitted ? (
         // Centered layout before submission
@@ -64,7 +100,8 @@ export default function Home() {
             onDiagnosticsChange={setDiagnosticsState}
             queryState={queryState}
             onQueryChange={setQueryState}
-            onSubmit={handleSubmit}
+            onSubmit={handleConfigSubmit}
+            isPondering={isPondering}
           />
         </div>
       ) : (
@@ -82,7 +119,8 @@ export default function Home() {
               onDiagnosticsChange={setDiagnosticsState}
               queryState={queryState}
               onQueryChange={setQueryState}
-              onSubmit={handleSubmit}
+              onSubmit={handleConfigSubmit}
+              isPondering={isPondering}
             />
           </aside>
 

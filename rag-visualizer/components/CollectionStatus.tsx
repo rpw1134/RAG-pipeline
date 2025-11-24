@@ -5,9 +5,10 @@ import { EMBEDDING_MODELS } from "@/app/utils/constants";
 
 interface CollectionStatusProps {
   className?: string;
+  refreshTrigger?: number;
 }
 
-export function CollectionStatus({ className = "" }: CollectionStatusProps) {
+export function CollectionStatus({ className = "", refreshTrigger = 0 }: CollectionStatusProps) {
   const [activeCollections, setActiveCollections] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [clearing, setClearing] = useState<string | null>(null);
@@ -30,7 +31,7 @@ export function CollectionStatus({ className = "" }: CollectionStatusProps) {
 
   useEffect(() => {
     fetchCollections();
-  }, []);
+  }, [refreshTrigger]);
 
   const isActive = (modelValue: string) => {
     return activeCollections.includes(modelValue);
