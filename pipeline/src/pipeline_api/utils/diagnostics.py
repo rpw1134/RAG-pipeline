@@ -13,33 +13,33 @@ from .embeddings import embed_texts, batch_embed_texts, calculate_average_pairwi
 
 def perform_chunk_diagnostics(chunks: List[Document]) -> dict:
     '''
-    Perform diagnostics on the provided chunks to calculate average chunk length,
-    average cohesion score, and average separation score.
-    
-    * Average Chunk Length: Precautionary measure. Extremes may indicate poor chunking and unreliable cohesion/separation scores.
+    Perform diagnostics on the provided chunks to calculate comprehensive statistics
+    for chunk length, cohesion score, and separation score.
+
+    * Chunk Length: Precautionary measure. Extremes may indicate poor chunking and unreliable cohesion/separation scores.
     * Cohesion Score: Measures how semantically similar sentences within a chunk are to each other. Higher scores indicate better cohesion.
     * Separation Score: Measures how semantically different consecutive chunks are from each other. Lower scores indicate better separation.
-    
-    Ideals:
+
+    Ideal ranges:
     1. Chunk length: 500-1500
     2. Cohesion score: 0.7-1.0
     3. Separation score: 0.1 to 0.4
     '''
     cohesion_scores = []
     seperation_scores = []
-    chunk_lengths = 0
-    average_chunk_length = 0
+    chunk_lengths_list = []
 
     if not chunks:
         return {
-            "average_chunk_length": -1,
-            "average_cohesion_score": -1,
-            "average_seperation_score": -1
+            "chunk_length": {"mean": -1, "std_dev": -1, "min": -1, "max": -1, "median": -1, "p25": -1, "p75": -1, "pct_in_ideal_range": -1, "distribution": []},
+            "cohesion": {"mean": -1, "std_dev": -1, "min": -1, "max": -1, "median": -1, "p25": -1, "p75": -1, "pct_in_ideal_range": -1, "distribution": []},
+            "separation": {"mean": -1, "std_dev": -1, "min": -1, "max": -1, "median": -1, "p25": -1, "p75": -1, "pct_in_ideal_range": -1, "distribution": []}
         }
+
     # cohesion score calculation
     for chunk in chunks:
         length = len(chunk.page_content)
-        chunk_lengths += length
+        chunk_lengths_list.append(length)
         sentences = chunk.page_content.split('.')
         sentence_embeddings = base_hugging_face_client.encode(
             sentences, normalize_embeddings=True
@@ -47,7 +47,7 @@ def perform_chunk_diagnostics(chunks: List[Document]) -> dict:
         for i in range(1, len(sentence_embeddings)):
             cohesion = np.dot(sentence_embeddings[i], sentence_embeddings[i-1])/(np.linalg.norm(sentence_embeddings[i-1])*np.linalg.norm(sentence_embeddings[i]))
             cohesion_scores.append(cohesion)
-    
+
     # seperation score calculation
     chunk_embeddings = base_hugging_face_client.encode(
         [chunk.page_content for chunk in chunks], normalize_embeddings=True
@@ -55,16 +55,101 @@ def perform_chunk_diagnostics(chunks: List[Document]) -> dict:
     for i in range(1, len(chunk_embeddings)):
         seperation = np.dot(chunk_embeddings[i], chunk_embeddings[i-1])/(np.linalg.norm(chunk_embeddings[i-1])*np.linalg.norm(chunk_embeddings[i]))
         seperation_scores.append(seperation)
-      
-    # averages (convert to native Python floats for JSON serialization)
-    average_chunk_length = float(chunk_lengths / len(chunks))
-    average_cohesion_score = float(sum(cohesion_scores) / len(cohesion_scores)) if cohesion_scores else -1.0
-    average_seperation_score = float(sum(seperation_scores) / len(seperation_scores)) if seperation_scores else -1.0
+
+    # Calculate statistics for chunk lengths
+    chunk_length_stats = calculate_metric_statistics(
+        chunk_lengths_list,
+        ideal_min=500,
+        ideal_max=1500,
+        bins=[0, 500, 1000, 1500, 2000, float('inf')]
+    )
+
+    # Calculate statistics for cohesion scores
+    cohesion_stats = calculate_metric_statistics(
+        cohesion_scores if cohesion_scores else [0.0],
+        ideal_min=0.7,
+        ideal_max=1.0,
+        bins=[0.0, 0.3, 0.5, 0.7, 0.85, 1.0]
+    )
+
+    # Calculate statistics for separation scores
+    separation_stats = calculate_metric_statistics(
+        seperation_scores if seperation_scores else [0.0],
+        ideal_min=0.1,
+        ideal_max=0.4,
+        bins=[0.0, 0.1, 0.2, 0.4, 0.6, 1.0]
+    )
 
     return {
-        "average_chunk_length": average_chunk_length,
-        "average_cohesion_score": average_cohesion_score,
-        "average_seperation_score": average_seperation_score
+        "chunk_length": chunk_length_stats,
+        "cohesion": cohesion_stats,
+        "separation": separation_stats
+    }
+
+def calculate_metric_statistics(values: List[float], ideal_min: float, ideal_max: float, bins: List[float]) -> dict:
+    """
+    Calculate comprehensive statistics for a metric including mean, std dev, percentiles, and distribution.
+
+    Args:
+        values: List of metric values.
+        ideal_min: Minimum value of the ideal range.
+        ideal_max: Maximum value of the ideal range.
+        bins: List of bin edges for distribution histogram.
+
+    Returns:
+        Dictionary containing statistical measures and distribution data.
+    """
+    if not values:
+        return {
+            "mean": -1.0,
+            "std_dev": -1.0,
+            "min": -1.0,
+            "max": -1.0,
+            "median": -1.0,
+            "p25": -1.0,
+            "p75": -1.0,
+            "pct_in_ideal_range": -1.0,
+            "distribution": []
+        }
+
+    values_array = np.array(values)
+
+    # Basic statistics
+    mean = float(np.mean(values_array))
+    std_dev = float(np.std(values_array))
+    min_val = float(np.min(values_array))
+    max_val = float(np.max(values_array))
+
+    # Percentiles
+    median = float(np.median(values_array))
+    p25 = float(np.percentile(values_array, 25))
+    p75 = float(np.percentile(values_array, 75))
+
+    # Percentage in ideal range
+    in_range = np.sum((values_array >= ideal_min) & (values_array <= ideal_max))
+    pct_in_ideal_range = float(in_range / len(values_array) * 100)
+
+    # Distribution histogram
+    hist, _ = np.histogram(values_array, bins=bins)
+    distribution = [
+        {
+            "range": f"{bins[i]}-{bins[i+1] if bins[i+1] != float('inf') else '+'}",
+            "count": int(hist[i]),
+            "percentage": float(hist[i] / len(values_array) * 100)
+        }
+        for i in range(len(hist))
+    ]
+
+    return {
+        "mean": mean,
+        "std_dev": std_dev,
+        "min": min_val,
+        "max": max_val,
+        "median": median,
+        "p25": p25,
+        "p75": p75,
+        "pct_in_ideal_range": pct_in_ideal_range,
+        "distribution": distribution
     }
     
 def calculate_reciprocal_rank(expected_document: str, returned_documents: List[tuple]) -> float:
@@ -248,7 +333,31 @@ def perform_synthetic_query_diagnostics(chunks: List[Document], embedding_model,
     except json.JSONDecodeError:
         return {"error": "Response is not valid JSON", "response": response}
 
-    res = evaluate_synthetic_queries(queries=response, documents=original_contents, embedding_model=embedding_model, num_results=num_results, num_rerank=num_rerank, rerank=rerank)
+    try:
+        res = evaluate_synthetic_queries(queries=response, documents=original_contents, embedding_model=embedding_model, num_results=num_results, num_rerank=num_rerank, rerank=rerank) 
+    except Exception as e:
+        return {"error": f"Error during synthetic query evaluation: {str(e)}"}
     return res
     
+
+def construct_time_object(parsing_time: float, chunking_time: float, embed_time: float, add_time: float) -> dict:
+    """
+    Construct a time object summarizing the time taken for each processing step.
+
+    Args:
+        parsing_time: Time taken to parse the document.
+        chunking_time: Time taken to chunk the document.
+        embed_time: Time taken to embed the chunks.
+        add_time: Time taken to add vectors to the database.
     
+    Returns:
+        A dictionary summarizing the time taken for each step and the total time.
+    """
+    total_time = parsing_time + chunking_time + embed_time + add_time
+    return {
+        "parsing_time": parsing_time,
+        "chunking_time": chunking_time,
+        "embed_time": embed_time,
+        "add_time": add_time,
+        "total_time": total_time
+    }

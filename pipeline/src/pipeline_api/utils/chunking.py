@@ -1,11 +1,12 @@
 from unstructured.documents.elements import Element
-from typing import List
+from typing import List, Tuple
 from langchain_text_splitters import RecursiveCharacterTextSplitter, CharacterTextSplitter
 from langchain_core.documents.base import Document
 from fastapi import HTTPException, status
 from ..utils.clients import clients
+import time
 
-def chunk_document(elements: List[Element], chunk_size: int = 1000, overlap: int = 200, chunking_strategy: str = "simple") -> List[Document]:
+def chunk_document(elements: List[Element], chunk_size: int = 1000, overlap: int = 200, chunking_strategy: str = "simple") -> Tuple[List[Document], float]:
     """
     Chunk parsed document elements using the specified strategy.
 
@@ -32,6 +33,7 @@ def chunk_document(elements: List[Element], chunk_size: int = 1000, overlap: int
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="overlap must be less than chunk_size")
 
     chunks: List[Document] = []
+    start_time = time.time()
     match chunking_strategy:
         case "simple":
             chunks = chunk_document_simply(elements, chunk_size, overlap)
@@ -44,8 +46,9 @@ def chunk_document(elements: List[Element], chunk_size: int = 1000, overlap: int
 
     if not chunks:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="No chunks could be created from the provided elements")
-
-    return chunks
+    end_time = time.time()
+    time_taken = end_time - start_time
+    return chunks, time_taken
     
 
 def chunk_document_by_structure(elements: List[Element], chunk_size: int = 1000, overlap: int = 200) -> List[Document]:

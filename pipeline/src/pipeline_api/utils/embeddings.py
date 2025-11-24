@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 from contextlib import contextmanager
 from langchain_core.documents.base import Document
 from .clients import clients, chroma_client
@@ -7,8 +7,9 @@ import numpy as np
 from numpy.typing import NDArray
 from fastapi import HTTPException, status
 import uuid
+import time
 
-def embed_chunks(chunks: List[Document], embedding_model: str) -> NDArray[np.float32]:
+def embed_chunks(chunks: List[Document], embedding_model: str) -> Tuple[NDArray[np.float32], float]:
     """
     Embed a list of Document chunks using the specified embedding model.
 
@@ -25,6 +26,7 @@ def embed_chunks(chunks: List[Document], embedding_model: str) -> NDArray[np.flo
     if not chunks:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No chunks provided for embedding")
     embeddings: List[List[float]] = []
+    start_time = time.time()
     match embedding_model:
         case "openai_small":
             embeddings = embed_openai(chunks, model="text-embedding-3-small")
@@ -39,7 +41,8 @@ def embed_chunks(chunks: List[Document], embedding_model: str) -> NDArray[np.flo
         case _:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unsupported embedding model: {embedding_model}")
     
-    return np.array(embeddings, dtype=np.float32)
+    time_taken = time.time() - start_time
+    return np.array(embeddings, dtype=np.float32), time_taken
 
 def embed_openai(chunks: List[Document], model) -> List[List[float]]:
     """

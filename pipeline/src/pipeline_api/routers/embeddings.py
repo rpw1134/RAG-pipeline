@@ -17,16 +17,22 @@ router = APIRouter(
 async def embed_document(file: UploadFile, config: str = Form(...)):
     config_data = FileEmbeddingRequest(**json.loads(config))
     bytes = file.file
-    elements = parse_pdf(bytes)
-    chunks = chunk_document(elements=elements, chunking_strategy=config_data.chunking_strategy)
+    elements, parsing_time = parse_pdf(bytes)
+    chunks, chunking_time = chunk_document(elements=elements, chunking_strategy=config_data.chunking_strategy)
     diagnostics = {}
     if config_data.run_chunk_diagnostics:
         diagnostics['chunk'] = perform_chunk_diagnostics(chunks=chunks)
-    embeddings = embed_chunks(chunks=chunks, embedding_model=config_data.model)
-    add_vectors(collection_name=config_data.model, embeddings=embeddings, documents=chunks)
+    embeddings, embed_time = embed_chunks(chunks=chunks, embedding_model=config_data.model)
+    add_time = add_vectors(collection_name=config_data.model, embeddings=embeddings, documents=chunks)
     if config_data.run_synthetic_query_diagnostics:
         diagnostics['synthetic'] = perform_synthetic_query_diagnostics(chunks=chunks,embedding_model=config_data.model, num_results=config_data.num_results,num_rerank=config_data.num_rerank, rerank=config_data.rerank
     )
+    diagnostics['timing'] = {
+        "parsing_time": parsing_time,
+        "chunking_time": chunking_time,
+        "embedding_time": embed_time,
+        "db_insertion_time": add_time
+    }
     
     return {"diagnostics": diagnostics, "num_chunks": len(chunks)}
 

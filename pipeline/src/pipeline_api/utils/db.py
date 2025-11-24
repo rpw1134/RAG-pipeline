@@ -7,8 +7,9 @@ import numpy as np
 from typing import List
 from chromadb.api.types import QueryResult
 from fastapi import HTTPException, status
+import time
 
-def add_vectors(collection_name: str, embeddings: NDArray[np.float32], documents: list[Document]):
+def add_vectors(collection_name: str, embeddings: NDArray[np.float32], documents: list[Document]) -> float:
     """
     Add document vectors to a ChromaDB collection.
 
@@ -30,6 +31,7 @@ def add_vectors(collection_name: str, embeddings: NDArray[np.float32], documents
     if len(embeddings) != len(documents):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Embeddings count ({len(embeddings)}) does not match documents count ({len(documents)})")
 
+    start_time = time.time()
     collection: Collection = collections[collection_name]
     collection.add(
         ids=[str(uuid()) for i in range(len(embeddings))],
@@ -37,6 +39,7 @@ def add_vectors(collection_name: str, embeddings: NDArray[np.float32], documents
         documents=[document.page_content for document in documents],
         metadatas=[document.metadata for document in documents],
     )
+    return time.time() - start_time
 
 def query_top_k(collection_name: str, embedding: NDArray[np.float32], k: int) -> QueryResult:
     """
