@@ -147,12 +147,10 @@ def evaluate_synthetic_queries(
     hits = 0
     misses = 0
     reciprocal_ranks = []
+    redundancy_scores = []
 
     for i, query_group in enumerate(queries):
         expected_document = documents[i]
-        doc_hits = 0
-        doc_misses = 0
-        doc_reciprocal_ranks = []
 
         for query in query_group:
             total_queries += 1
@@ -179,21 +177,24 @@ def evaluate_synthetic_queries(
                 returned_documents = format_documents(results)
 
             returned_docs_list = list(returned_documents.documents)
+            returned_docs_strings = list(map(lambda doc: doc[0], list(returned_documents.documents)))
 
             # Calculate reciprocal rank for this query
             rr = calculate_reciprocal_rank(expected_document, returned_docs_list)
             reciprocal_ranks.append(rr)
-            doc_reciprocal_ranks.append(rr)
+            
+            # Calculate redundancy score for this set of returned documents
+            redundancy = calculate_redundancy_score(returned_docs_strings, embedding_model)
+            redundancy_scores.append(redundancy)
 
-            if expected_document in list(map(lambda doc: doc[0], returned_docs_list)):
+            if expected_document in returned_docs_strings:
                 hits += 1
-                doc_hits += 1
             else:
                 misses += 1
-                doc_misses += 1
 
     hit_rate = hits / total_queries if total_queries > 0 else 0.0
     mrr = sum(reciprocal_ranks) / len(reciprocal_ranks) if reciprocal_ranks else 0.0
+    redundancy = sum(redundancy_scores) / len(redundancy_scores) if redundancy_scores else 0.0
 
     return {
         "total_queries": total_queries,
@@ -201,6 +202,7 @@ def evaluate_synthetic_queries(
         "misses": misses,
         "hit_rate": hit_rate,
         "mrr": mrr,
+        "redundancy": redundancy
     }
     
     
