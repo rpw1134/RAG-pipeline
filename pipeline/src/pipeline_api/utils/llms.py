@@ -7,6 +7,22 @@ from fastapi import HTTPException, status
 
 
 def send_chat_request(query: str, context: RerankerResponse, include_metadatas: bool, model: str = "gpt-4") -> List[str | float]:
+    """
+    Send a chat request to an LLM with retrieved context documents.
+
+    Args:
+        query: The user's query to answer.
+        context: RerankerResponse containing ranked documents and scores.
+        include_metadatas: Whether to include document metadata in the prompt.
+        model: The LLM model to use (default: "gpt-4").
+
+    Returns:
+        A list containing [response_text, confidence_score].
+
+    Raises:
+        HTTPException: If query is empty, no context provided, model unsupported,
+                       or API error occurs.
+    """
     if not query or not query.strip():
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No query provided")
     if not context.documents:
@@ -48,6 +64,15 @@ def send_chat_request(query: str, context: RerankerResponse, include_metadatas: 
 
 
 def construct_context_strings_with_metadatas(context: RerankerResponse) -> List[str]:
+    """
+    Format context documents with their metadata for LLM prompts.
+
+    Args:
+        context: RerankerResponse containing documents and relevance scores.
+
+    Returns:
+        List of formatted strings with document content, score, and metadata.
+    """
     context_strs: List[str] = []
     for doc, score in zip(context.documents, context.scores):
         metadata_str: str = json.dumps(doc[1])
@@ -55,6 +80,15 @@ def construct_context_strings_with_metadatas(context: RerankerResponse) -> List[
     return context_strs
 
 def construct_context_strings_without_metadatas(context: RerankerResponse) -> List[str]:
+    """
+    Format context documents without metadata for LLM prompts.
+
+    Args:
+        context: RerankerResponse containing documents and relevance scores.
+
+    Returns:
+        List of formatted strings with document content and score only.
+    """
     context_strs: List[str] = []
     for doc, score in zip(context.documents, context.scores):
         context_strs.append(f"Document: {doc[0]}\nRelevance Score: {score:.4f}\n")

@@ -6,6 +6,22 @@ from fastapi import HTTPException, status
 from ..utils.clients import clients
 
 def chunk_document(elements: List[Element], chunk_size: int = 1000, overlap: int = 200, chunking_strategy: str = "simple") -> List[Document]:
+    """
+    Chunk parsed document elements using the specified strategy.
+
+    Args:
+        elements: List of Element objects from document parsing.
+        chunk_size: Maximum size of each chunk in characters.
+        overlap: Number of overlapping characters between consecutive chunks.
+        chunking_strategy: One of "simple", "recursive", or "structural".
+
+    Returns:
+        List of Document objects with page_content and metadata.
+
+    Raises:
+        HTTPException: If elements are empty, chunk_size/overlap are invalid,
+                       or strategy is unsupported.
+    """
     if not elements:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No elements provided for chunking")
     if chunk_size <= 0:
@@ -33,6 +49,20 @@ def chunk_document(elements: List[Element], chunk_size: int = 1000, overlap: int
     
 
 def chunk_document_by_structure(elements: List[Element], chunk_size: int = 1000, overlap: int = 200) -> List[Document]:
+    """
+    Chunk document by semantic structure, grouping related elements together.
+
+    Groups elements by their type (headers with content, tables, lists) before
+    applying recursive splitting. Preserves section boundaries where possible.
+
+    Args:
+        elements: List of Element objects from document parsing.
+        chunk_size: Maximum size of each chunk in characters.
+        overlap: Number of overlapping characters between consecutive chunks.
+
+    Returns:
+        List of Document objects with section and chunk metadata.
+    """
     sections: List[str] = group_related_elements(elements=elements)
     documents: List[Document] = []
     splitter = RecursiveCharacterTextSplitter(
@@ -54,6 +84,20 @@ def chunk_document_by_structure(elements: List[Element], chunk_size: int = 1000,
     return documents
         
 def chunk_document_recursively(elements: List[Element], chunk_size: int = 1000, overlap: int = 200) -> List[Document]:
+    """
+    Chunk document using recursive character splitting.
+
+    Attempts to split on paragraph breaks first, then sentences, then words,
+    preserving semantic coherence where possible.
+
+    Args:
+        elements: List of Element objects from document parsing.
+        chunk_size: Maximum size of each chunk in characters.
+        overlap: Number of overlapping characters between consecutive chunks.
+
+    Returns:
+        List of Document objects with chunk index metadata.
+    """
     document: str = "\n\n".join([str(element.text) for element in elements if element.text])
     splitter = RecursiveCharacterTextSplitter(
         separators=["\n\n", "\n", " ", ""],
@@ -69,6 +113,20 @@ def chunk_document_recursively(elements: List[Element], chunk_size: int = 1000, 
     return documents
 
 def chunk_document_simply(elements: List[Element], chunk_size: int = 1000, overlap: int = 200)  -> List[Document]:
+    """
+    Chunk document using simple character-based splitting.
+
+    Splits text at fixed character intervals with overlap, without considering
+    semantic boundaries.
+
+    Args:
+        elements: List of Element objects from document parsing.
+        chunk_size: Maximum size of each chunk in characters.
+        overlap: Number of overlapping characters between consecutive chunks.
+
+    Returns:
+        List of Document objects with chunk index metadata.
+    """
     document: str = "\n\n".join([str(element.text) for element in elements if element.text])
     splitter = CharacterTextSplitter(
         chunk_size=chunk_size,
@@ -85,6 +143,18 @@ def chunk_document_simply(elements: List[Element], chunk_size: int = 1000, overl
 
 
 def group_related_elements(elements: List[Element]) -> List[str]:
+    """
+    Group semantically related elements into sections.
+
+    Combines headers with their following content, groups consecutive list items,
+    and keeps tables together.
+
+    Args:
+        elements: List of Element objects from document parsing.
+
+    Returns:
+        List of strings, each representing a logical section of the document.
+    """
     sections: List[str] = []
     i = 0
     while i<len(elements):
