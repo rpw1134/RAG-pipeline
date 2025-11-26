@@ -7,6 +7,7 @@ import {
   CartesianGrid,
   Tooltip,
   Cell,
+  ResponsiveContainer,
 } from "recharts";
 import { extractChunkGroups } from "@/app/utils/dataTransformation";
 import { ChunkBarChartData, MetricStatistics } from "@/app/utils/types";
@@ -19,7 +20,13 @@ interface MetricCardProps {
   unit?: string;
 }
 
-function MetricCard({ title, data, idealMin, idealMax, unit = "" }: MetricCardProps) {
+function MetricCard({
+  title,
+  data,
+  idealMin,
+  idealMax,
+  unit = "",
+}: MetricCardProps) {
   const distributionData = extractChunkGroups(data, idealMin, idealMax);
   const healthColor =
     data.pct_in_ideal_range >= 80
@@ -61,16 +68,26 @@ function MetricCard({ title, data, idealMin, idealMax, unit = "" }: MetricCardPr
           </span>
         </div>
         <div className="text-xs text-gray-500 mt-1">
-          Ideal: {idealMin}{unit} - {idealMax}{unit}
+          Ideal: {idealMin}
+          {unit} - {idealMax}
+          {unit}
         </div>
       </div>
     </div>
   );
 }
 
-function StatItem({ label, value, unit = "" }: { label: string; value: string; unit?: string }) {
+function StatItem({
+  label,
+  value,
+  unit = "units",
+}: {
+  label: string;
+  value: string;
+  unit?: string;
+}) {
   return (
-    <div className="bg-gray-900 rounded p-3">
+    <div className="bg-gray-900 rounded p-3 h-20">
       <p className="text-xs text-gray-400 mb-1">{label}</p>
       <p className="text-sm font-semibold text-white">
         {value}
@@ -82,29 +99,29 @@ function StatItem({ label, value, unit = "" }: { label: string; value: string; u
 
 function DistributionBarChart({ data }: { data: ChunkBarChartData[] }) {
   return (
-    <BarChart
-      width={500}
-      height={200}
-      data={data}
-      margin={{ top: 5, right: 20, left: 10, bottom: 5 }}
-    >
-      <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-      <XAxis dataKey="name" tick={{ fill: "#9ca3af", fontSize: 12 }} />
-      <YAxis tick={{ fill: "#9ca3af", fontSize: 12 }} width={40} />
-      <Tooltip
-        contentStyle={{
-          backgroundColor: "#1f2937",
-          border: "1px solid #374151",
-          borderRadius: "0.375rem",
-          color: "#fff",
-        }}
-      />
-      <Bar dataKey="count" radius={[4, 4, 0, 0]}>
-        {data.map((entry, index) => (
-          <Cell key={`cell-${index}`} fill={entry.fill || "#f97316"} />
-        ))}
-      </Bar>
-    </BarChart>
+    <ResponsiveContainer width="100%" height={200}>
+      <BarChart
+        data={data}
+        margin={{ top: 5, right: 10, left: -10, bottom: 5 }}
+      >
+        <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+        <XAxis dataKey="name" tick={{ fill: "#9ca3af", fontSize: 11 }} />
+        <YAxis tick={{ fill: "#9ca3af", fontSize: 11 }} width={35} />
+        <Tooltip
+          contentStyle={{
+            backgroundColor: "#1f2937",
+            border: "1px solid #374151",
+            borderRadius: "0.375rem",
+            color: "#ffffff",
+          }}
+        />
+        <Bar dataKey="count" radius={[4, 4, 0, 0]}>
+          {data.map((entry, index) => (
+            <Cell key={`cell-${index}`} fill={entry.fill || "#f97316"} />
+          ))}
+        </Bar>
+      </BarChart>
+    </ResponsiveContainer>
   );
 }
 
