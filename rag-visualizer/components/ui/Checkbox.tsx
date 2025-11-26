@@ -11,7 +11,7 @@ export function Checkbox({ label, checked, onChange }: CheckboxProps) {
         type="checkbox"
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
-        className="h-4 w-4 rounded border-border bg-input-bg text-accent focus:ring-accent focus:ring-offset-0"
+        className="h-4 w-4 rounded border-border bg-input-bg text-accent focus:ring-accent focus:ring-offset-0 cursor-pointer"
       />
       <span className="text-sm">{label}</span>
     </label>

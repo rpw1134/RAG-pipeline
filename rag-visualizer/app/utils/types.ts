@@ -94,3 +94,23 @@ export interface EmbeddingResponse {
   diagnostics: Diagnostics;
   num_chunks: number;
 }
+
+/**
+ * Metadata for a retrieved context chunk
+ */
+export interface ContextMetadata {
+  section: number;
+  chunk_of_section: number;
+  total_chunks_in_section: number;
+  total_sections: number;
+}
+
+/**
+ * Response from a query endpoint containing LLM response and retrieved context
+ */
+export interface QueryResponse {
+  llm_response: string;
+  confidence_score: number;
+  context_returned: Array<[string, ContextMetadata]>;
+  context_scores: number[];
+}

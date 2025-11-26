@@ -10,6 +10,7 @@ from fastapi import HTTPException, status
 from .clients import collections
 from .db import query_top_k
 from .embeddings import embed_texts, batch_embed_texts, calculate_average_pairwise_similarity
+from ..utils.llms import generate_synthetic_query_prompt
 
 def perform_chunk_diagnostics(chunks: List[Document]) -> dict:
     '''
@@ -324,7 +325,7 @@ def perform_synthetic_query_diagnostics(chunks: List[Document], embedding_model,
         messages=[
             {
                 "role": "system",
-                "content": SYNTHETIC_EVALUATION_PROMPT + "\n\n" + chunks_string
+                "content": generate_synthetic_query_prompt(len(testable_chunks)) + "\n\n" + chunks_string
             },
         ]
     )
@@ -339,6 +340,7 @@ def perform_synthetic_query_diagnostics(chunks: List[Document], embedding_model,
     try:
         print(len(response))
         print(len(testable_chunks))
+        print(response)
         res = evaluate_synthetic_queries(queries=response, documents=original_contents, embedding_model=embedding_model, num_results=num_results, num_rerank=num_rerank, rerank=rerank) 
     except Exception as e:
         return {"error": f"Error during synthetic query evaluation: {str(e)}"}

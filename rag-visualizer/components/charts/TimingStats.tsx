@@ -129,7 +129,7 @@ export default function TimingStatsChart({
           </ResponsiveContainer>
 
           {/* Total Time */}
-          <div className="mt-6 pt-4 border-t border-gray-700 text-center">
+          <div className="mt-6 pt-4 border-t border-black text-center">
             <p className="text-sm text-gray-400 mb-1">Total Processing Time</p>
             <p className="text-3xl font-bold text-gray-300">
               {totalTime.toFixed(3)}s

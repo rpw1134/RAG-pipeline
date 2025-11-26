@@ -12,7 +12,7 @@ export function ModeToggle({ mode, onModeChange }: ModeToggleProps) {
         <button
           type="button"
           onClick={() => onModeChange("diagnostics")}
-          className={`flex-1 rounded-md py-2 px-2 text-sm font-medium transition-all ${
+          className={`flex-1 rounded-md py-2 px-2 text-sm font-medium cursor-pointer transition-all ${
             mode === "diagnostics"
               ? "bg-accent text-white"
               : "text-muted hover:text-foreground"
@@ -23,7 +23,7 @@ export function ModeToggle({ mode, onModeChange }: ModeToggleProps) {
         <button
           type="button"
           onClick={() => onModeChange("query")}
-          className={`flex-1 rounded-md py-2 text-sm font-medium transition-all ${
+          className={`flex-1 rounded-md py-2 text-sm cursor-pointer font-medium transition-all ${
             mode === "query"
               ? "bg-accent text-white"
               : "text-muted hover:text-foreground"

@@ -8,7 +8,7 @@ import {
   type DiagnosticsFormState,
   type QueryFormState,
 } from "@/components";
-import { EmbeddingResponse } from "./utils/types";
+import { EmbeddingResponse, QueryResponse } from "./utils/types";
 
 type Mode = "diagnostics" | "query";
 
@@ -39,12 +39,15 @@ export default function Home() {
     initialDiagnosticsState
   );
   const [queryState, setQueryState] = useState(initialQueryState);
-  const [isSubmitted, setIsSubmitted] = useState(true);
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const [isPondering, setIsPondering] = useState(false);
   const [collectionRefresh, setCollectionRefresh] = useState(0);
-  const [responseData, setResponseData] = useState<EmbeddingResponse | null>(
-    null
-  );
+  const [responseData, setResponseData] = useState<
+    EmbeddingResponse | QueryResponse | null
+  >(null);
+  const [diagnosticsData, setDiagnosticsData] =
+    useState<EmbeddingResponse | null>(null);
+  const [queryData, setQueryData] = useState<QueryResponse | null>(null);
 
   const handleConfigSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,6 +57,7 @@ export default function Home() {
       let response;
       const formData = new FormData();
       const config = mode === "diagnostics" ? diagnosticsState : queryState;
+
       if (mode === "diagnostics") {
         const file = mode === "diagnostics" ? selectedFile : null;
         if (file) {
@@ -66,8 +70,20 @@ export default function Home() {
           method: "POST",
           body: formData,
         });
+        const data: EmbeddingResponse = await response.json();
+        setResponseData(data);
+        setDiagnosticsData(data);
+        setMode("diagnostics");
       } else {
+        // Validate query is not empty
+        if (!queryState.query || queryState.query.trim() === "") {
+          alert("Please enter a query");
+          setIsPondering(false);
+          return;
+        }
+
         // Send JSON for query mode — stringify the config and set Content-Type header
+        console.log("Submitting query config:", config);
         response = await fetch("http://localhost:8000/queries", {
           method: "POST",
           headers: {
@@ -75,18 +91,36 @@ export default function Home() {
           },
           body: JSON.stringify(config),
         });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("Query submission error:", errorText);
+          alert(`Error: ${errorText}`);
+          setIsPondering(false);
+          return;
+        }
+
+        const data: QueryResponse = await response.json();
+        console.log("Query response:", data);
+        setResponseData(data);
+        setQueryData(data);
+        setMode("query");
       }
-      const data: EmbeddingResponse = await response.json();
-      console.log(data);
       setCollectionRefresh((prev) => prev + 1);
       setIsSubmitted(true);
-      setResponseData(data);
-      setMode("diagnostics");
     } catch (error) {
       console.error("Error submitting:", error);
+      alert(`Error: ${error instanceof Error ? error.message : String(error)}`);
     } finally {
       setIsPondering(false);
     }
+  };
+
+  const handleChangeMode = (newMode: Mode) => {
+    console.log("diagnostic:", diagnosticsData);
+    console.log("query", queryData);
+    setResponseData(newMode === "diagnostics" ? diagnosticsData : queryData);
+    setMode(newMode);
   };
 
   return (
@@ -102,7 +136,7 @@ export default function Home() {
         <div className="mx-auto max-w-2xl px-6 py-12">
           <ConfigPanel
             mode={mode}
-            onModeChange={setMode}
+            onModeChange={handleChangeMode}
             selectedFile={selectedFile}
             onFileSelect={setSelectedFile}
             diagnosticsState={diagnosticsState}
@@ -121,7 +155,7 @@ export default function Home() {
             <ConfigPanel
               compact
               mode={mode}
-              onModeChange={setMode}
+              onModeChange={handleChangeMode}
               selectedFile={selectedFile}
               onFileSelect={setSelectedFile}
               diagnosticsState={diagnosticsState}

@@ -154,9 +154,67 @@ const EXAMPLE_DIAGNOSTIC_RESPONSE: EmbeddingResponse = {
   num_chunks: 19,
 };
 
+const EXAMPLE_QUERY_RESPONSE = {
+  llm_response:
+    "Based on the provided context, some of your experiences include:\n\n1. Full Stack Software Engineering Intern at Laetro in Mountain View, CA (May 2025 – Aug 2025), where you led R&D for a Google Workspace AI-native multi-agent application and built a scalable Node.js REST API for Google Chat message routing.\n\n2. Built an AI-powered programming challenge platform to dynamically generate interview coding problems and developed a monolithic React.js front-end with a microservices-based Spring Boot REST API.\n\n3. Engineered a social platform using Next.js, enabling students to share class resources and exchange academic questions.",
+  confidence_score: 90.0,
+  context_returned: [
+    [
+      "AWARDS & RECOGNITIONS\n\n",
+      {
+        section: 17,
+        chunk_of_section: 0,
+        total_chunks_in_section: 1,
+        total_sections: 19,
+      },
+    ],
+    [
+      "WORK EXPERIENCE AND LEADERSHIP\n\n",
+      {
+        chunk_of_section: 0,
+        total_sections: 19,
+        total_chunks_in_section: 1,
+        section: 9,
+      },
+    ],
+    [
+      "EDUCATION\n\n",
+      {
+        total_sections: 19,
+        chunk_of_section: 0,
+        total_chunks_in_section: 1,
+        section: 1,
+      },
+    ],
+    [
+      "Full Stack Software Engineering Intern | Laetro – Mountain View, CA\n\nMay 2025 – Aug 2025\n● Led research and development (R&D) for a Google Workspace AI-native multi-agent application, enabling seamless AI agent integration within 10+ existing enterprise workflows to drive automation adoption\n● Built a scalable Node.js REST API to route Google Chat messages to a suite of fine-tuned RAG-based AI agents, implementing complex query translation and dynamic UI rendering via Google Card Framework\n● Implemented comprehensive testing strategies using Postman and GitHub Actions CI/CD pipelines, ensuring robust deployment across multiple development environments with 99%+ uptime\n● Technologies: Node.js, TypeScript, Express, Google Cloud, Prisma\n",
+      {
+        chunk_of_section: 0,
+        total_chunks_in_section: 1,
+        section: 10,
+        total_sections: 19,
+      },
+    ],
+    [
+      "● Built an AI-powered programming challenge platform to dynamically generate interview coding problems in 6 common categories, creating a comprehensive technical interview preparation tool for aspiring engineers\n\n● Developed monolithic React.js front-end and a microservices based Spring Boot REST API with Docker containerization to enable secure, isolated runtime environments for automated code testing and feedback Medius Discussion | TypeScript, Next.js, TailwindCSS, Supabase May 2025 – August 2025\n● Engineered a social platform using Next.js, enabling McGill students to share class resources and exchange academic questions and insights across 700+ unique discussion boards, driving collaboration and supporting students in times of need\n",
+      {
+        total_chunks_in_section: 1,
+        chunk_of_section: 0,
+        total_sections: 19,
+        section: 16,
+      },
+    ],
+  ],
+  context_scores: [
+    -3.2409279346466064, -4.0830535888671875, -4.211691379547119,
+    -7.275246620178223, -8.102707862854004,
+  ],
+};
+
 export {
   EMBEDDING_MODELS,
   CHUNKING_STRATEGIES,
   LLM_MODELS,
   EXAMPLE_DIAGNOSTIC_RESPONSE,
+  EXAMPLE_QUERY_RESPONSE,
 };

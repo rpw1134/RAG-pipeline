@@ -39,10 +39,17 @@ def rerank_documents(query: str, query_results: QueryResult , k: int )-> Reranke
     scores: np.ndarray | None = reranker.compute_score(pairs)
     if scores is None:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Reranker returned no scores")
+
+    # Normalize reranker scores to [-1, 1] range to match cosine similarity scale
+    # Using tanh to smoothly map unbounded scores to bounded range
+    # Ensure scores is a numpy array for element-wise division
+    scores_array = np.asarray(scores)
+    normalized_scores = np.tanh(scores_array / 10.0)
+
     # Sort by descending score (highest relevance first) and take top k
-    ranked_indices: List[int] = np.argsort(scores)[::-1][:k].tolist()
+    ranked_indices: List[int] = np.argsort(normalized_scores)[::-1][:k].tolist()
     reranked_docs: List[Tuple[str, dict]] = [(documents[i], dict(metadata_result[0][i])) for i in ranked_indices]
-    sorted_scores: List[float] = [float(scores[i]) for i in ranked_indices]
+    sorted_scores: List[float] = [float(normalized_scores[i]) for i in ranked_indices]
     return RerankerResponse(
         documents=reranked_docs,
         scores=sorted_scores

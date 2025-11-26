@@ -93,3 +93,12 @@ def construct_context_strings_without_metadatas(context: RerankerResponse) -> Li
     for doc, score in zip(context.documents, context.scores):
         context_strs.append(f"Document: {doc[0]}\nRelevance Score: {score:.4f}\n")
     return context_strs
+
+def generate_synthetic_query_prompt(num_documents: int) -> str:
+    """
+    Generate a prompt for synthetic query generation based on provided documents.
+
+    Args:
+        documents: List of document strings.
+        """
+    return f"You will be provided a number of documents. You will then generate 2 queries per document that should return the given document as part of a semantic search. For example, a document outlining how to cook steak should be returned for questions like: ['How do I prepare a steak dinner?', 'What are some good recipes for cooking steak?']. Your response must include exactly 2 queries per document in a JSON array format. For example, if num_documents==2: [['query1 for doc1', 'query2 for doc1'], ['query1 for doc2', 'query2 for doc2']]. You must ensure that the number of query groups matches the number of documents given to you. That is, len(response) == {num_documents} and len(res)==2 for res in response. It is IMPERATIVE that the length of the list you return is the same length as the documents I provide to you; that is, you generate a list of length {num_documents} where each entry is of length 2. Here are the documents:"
