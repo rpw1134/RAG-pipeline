@@ -48,7 +48,7 @@ export default function QueryResults({ data }: QueryResultsProps) {
         </h3>
         <div className="space-y-4">
           {data.context_returned?.map((context, index) => {
-            const [text, metadata] = context;
+            const [text] = context;
             const score = data.context_scores?.[index] ?? 0;
 
             return (
@@ -63,11 +63,6 @@ export default function QueryResults({ data }: QueryResultsProps) {
                       <span className="text-sm font-semibold text-gray-400">
                         Document {index + 1}
                       </span>
-                      <span className="text-xs text-gray-500">
-                        Section {metadata.section} • Chunk{" "}
-                        {metadata.chunk_of_section + 1} of{" "}
-                        {metadata.total_chunks_in_section}
-                      </span>
                     </div>
                     <p className="text-gray-300 text-base whitespace-pre-wrap">
                       {text}
@@ -75,7 +70,7 @@ export default function QueryResults({ data }: QueryResultsProps) {
                   </div>
 
                   {/* Context Score */}
-                  <div className="flex-shrink-0 text-right">
+                  <div className="shrink-0 text-right">
                     <p className="text-sm text-gray-400 mb-1">Score</p>
                     <p className="text-2xl font-bold text-gray-300">
                       {score.toFixed(2)}

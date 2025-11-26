@@ -1,4 +1,3 @@
-import { EXAMPLE_DIAGNOSTIC_RESPONSE } from "@/app/utils/constants";
 import {
   BarChart,
   Bar,

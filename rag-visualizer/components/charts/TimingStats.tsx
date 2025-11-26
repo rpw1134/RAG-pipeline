@@ -80,7 +80,7 @@ export default function TimingStatsChart({
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Pie Chart */}
-        <div className="bg-[#282828] rounded-lg p-6 shadow-lg lg:h-[36rem]">
+        <div className="bg-[#282828] rounded-lg p-6 shadow-lg lg:h-144">
           <h3 className="text-lg font-semibold mb-4 text-white text-center">
             Time Distribution
           </h3>
