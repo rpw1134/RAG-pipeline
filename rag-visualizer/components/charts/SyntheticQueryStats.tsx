@@ -1,10 +1,10 @@
-import { EXAMPLE_DIAGNOSTIC_RESPONSE } from "@/app/utils/constants";
 import {
   RadialBarChart,
   RadialBar,
   PolarAngleAxis,
   ResponsiveContainer,
 } from "recharts";
+import { SyntheticQueryDiagnostics } from "@/app/utils/types";
 
 interface GaugeCardProps {
   title: string;
@@ -23,7 +23,7 @@ function GaugeCard({ title, value, color, subtitle }: GaugeCardProps) {
   };
 
   return (
-    <div className="bg-gray-800 rounded-lg p-6 shadow-lg">
+    <div className="bg-[#282828] rounded-lg p-6 shadow-lg h-96">
       <h3 className="text-lg font-semibold mb-2 text-white text-center">
         {title}
       </h3>
@@ -31,8 +31,8 @@ function GaugeCard({ title, value, color, subtitle }: GaugeCardProps) {
         <p className="text-xs text-gray-400 text-center mb-4">{subtitle}</p>
       )}
 
-      <div className="flex items-center justify-center">
-        <ResponsiveContainer width={200} height={200}>
+      <div className="relative flex items-center justify-center h-96">
+        <ResponsiveContainer width={300} height={300}>
           <RadialBarChart
             innerRadius="70%"
             outerRadius="100%"
@@ -54,12 +54,11 @@ function GaugeCard({ title, value, color, subtitle }: GaugeCardProps) {
             />
           </RadialBarChart>
         </ResponsiveContainer>
-      </div>
-
-      <div className="text-center mt-4">
-        <p className={`text-4xl font-bold ${getColorClass()}`}>
-          {(value * 100).toFixed(1)}%
-        </p>
+        <div className="absolute inset-0 flex items-center justify-center pt-12">
+          <p className={`text-4xl font-bold ${getColorClass()}`}>
+            {(value * 100).toFixed(1)}%
+          </p>
+        </div>
       </div>
     </div>
   );
@@ -79,7 +78,7 @@ function MetricBox({
   colorClass = "text-blue-500",
 }: MetricBoxProps) {
   return (
-    <div className="bg-gray-800 rounded-lg p-6 shadow-lg">
+    <div className="bg-[#282828] rounded-lg p-6 shadow-lg">
       <p className="text-sm text-gray-400 mb-2">{label}</p>
       <p className={`text-3xl font-bold ${colorClass}`}>{value}</p>
       {subtext && <p className="text-xs text-gray-500 mt-2">{subtext}</p>}
@@ -87,10 +86,12 @@ function MetricBox({
   );
 }
 
-export default function SyntheticQueryStatsChart() {
-  const synthetic = EXAMPLE_DIAGNOSTIC_RESPONSE.diagnostics.synthetic;
-
-  if (!synthetic) {
+export default function SyntheticQueryStatsChart({
+  data,
+}: {
+  data: SyntheticQueryDiagnostics | undefined;
+}) {
+  if (!data) {
     return (
       <div className="text-white text-center p-8">
         No synthetic query diagnostics available
@@ -99,8 +100,8 @@ export default function SyntheticQueryStatsChart() {
   }
 
   const getRedundancyColor = () => {
-    if (synthetic.redundancy < 0.5) return "text-green-500";
-    if (synthetic.redundancy < 0.7) return "text-yellow-500";
+    if (data.redundancy < 0.5) return "text-green-500";
+    if (data.redundancy < 0.7) return "text-yellow-500";
     return "text-red-500";
   };
 
@@ -114,13 +115,13 @@ export default function SyntheticQueryStatsChart() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <GaugeCard
           title="Hit Rate"
-          value={synthetic.hit_rate}
+          value={data.hit_rate}
           color="#22c55e"
           subtitle="% of queries that retrieved the expected document"
         />
         <GaugeCard
           title="Mean Reciprocal Rank"
-          value={synthetic.mrr}
+          value={data.mrr}
           color="#3b82f6"
           subtitle="Average ranking position of expected documents"
         />
@@ -130,25 +131,27 @@ export default function SyntheticQueryStatsChart() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <MetricBox
           label="Total Queries"
-          value={synthetic.total_queries}
+          value={data.total_queries}
           colorClass="text-gray-300"
         />
         <MetricBox
           label="Hits / Misses"
-          value={`${synthetic.hits} / ${synthetic.misses}`}
+          value={`${data.hits} / ${data.misses}`}
           colorClass="text-green-500"
-          subtext={`${((synthetic.hits / synthetic.total_queries) * 100).toFixed(1)}% success rate`}
+          subtext={`${((data.hits / data.total_queries) * 100).toFixed(
+            1
+          )}% success rate`}
         />
         <MetricBox
           label="Redundancy Score"
-          value={`${(synthetic.redundancy * 100).toFixed(1)}%`}
+          value={`${(data.redundancy * 100).toFixed(1)}%`}
           colorClass={getRedundancyColor()}
           subtext="Lower is better (more diverse results)"
         />
       </div>
 
       {/* Explanation */}
-      <div className="bg-gray-800 rounded-lg p-4 mt-6">
+      <div className="bg-[#282828] rounded-lg p-4 mt-6">
         <p className="text-xs text-gray-400">
           <strong className="text-white">Note:</strong> These metrics evaluate
           how well the retrieval system finds expected documents. Hit Rate shows

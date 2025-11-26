@@ -10,7 +10,11 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { extractChunkGroups } from "@/app/utils/dataTransformation";
-import { ChunkBarChartData, MetricStatistics } from "@/app/utils/types";
+import {
+  ChunkBarChartData,
+  ChunkDiagnostics,
+  MetricStatistics,
+} from "@/app/utils/types";
 
 interface MetricCardProps {
   title: string;
@@ -36,7 +40,7 @@ function MetricCard({
       : "text-red-500";
 
   return (
-    <div className="bg-gray-800 rounded-lg p-6 shadow-lg">
+    <div className="bg-[#282828] rounded-lg p-6 shadow-lg">
       <h3 className="text-xl font-semibold mb-4 text-white">{title}</h3>
 
       {/* Distribution Chart */}
@@ -87,7 +91,7 @@ function StatItem({
   unit?: string;
 }) {
   return (
-    <div className="bg-gray-900 rounded p-3 h-20">
+    <div className="bg-[#343434] rounded p-3 h-24">
       <p className="text-xs text-gray-400 mb-1">{label}</p>
       <p className="text-sm font-semibold text-white">
         {value}
@@ -109,15 +113,15 @@ function DistributionBarChart({ data }: { data: ChunkBarChartData[] }) {
         <YAxis tick={{ fill: "#9ca3af", fontSize: 11 }} width={35} />
         <Tooltip
           contentStyle={{
-            backgroundColor: "#1f2937",
+            backgroundColor: "#d4d4d8",
             border: "1px solid #374151",
             borderRadius: "0.375rem",
-            color: "#ffffff",
+            color: "black",
           }}
         />
         <Bar dataKey="count" radius={[4, 4, 0, 0]}>
           {data.map((entry, index) => (
-            <Cell key={`cell-${index}`} fill={entry.fill || "#f97316"} />
+            <Cell key={`cell-${index}`} fill={entry.fill || "#22c55e"} />
           ))}
         </Bar>
       </BarChart>
@@ -125,10 +129,8 @@ function DistributionBarChart({ data }: { data: ChunkBarChartData[] }) {
   );
 }
 
-function ChunkStatsChart() {
-  const chunkData = EXAMPLE_DIAGNOSTIC_RESPONSE.diagnostics.chunk;
-
-  if (!chunkData) {
+function ChunkStatsChart({ data }: { data: ChunkDiagnostics | undefined }) {
+  if (!data) {
     return (
       <div className="text-white text-center p-8">
         No chunk diagnostics available
@@ -143,20 +145,20 @@ function ChunkStatsChart() {
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
         <MetricCard
           title="Chunk Length"
-          data={chunkData.chunk_length}
+          data={data.chunk_length}
           idealMin={0}
           idealMax={2000}
           unit=" chars"
         />
         <MetricCard
           title="Cohesion Score"
-          data={chunkData.cohesion}
+          data={data.cohesion}
           idealMin={0.6}
           idealMax={1.0}
         />
         <MetricCard
           title="Separation Score"
-          data={chunkData.separation}
+          data={data.separation}
           idealMin={0.1}
           idealMax={0.6}
         />

@@ -1,4 +1,3 @@
-import { EXAMPLE_DIAGNOSTIC_RESPONSE } from "@/app/utils/constants";
 import {
   PieChart,
   Pie,
@@ -12,7 +11,7 @@ import {
   transformTimingForTable,
   calculateTotalTime,
 } from "@/app/utils/dataTransformation";
-import { TimingStatsTableData } from "@/app/utils/types";
+import { TimingStatsTableData, TimingDiagnostics } from "@/app/utils/types";
 
 interface TimingTableProps {
   data: TimingStatsTableData[];
@@ -21,9 +20,9 @@ interface TimingTableProps {
 function TimingTable({ data }: TimingTableProps) {
   return (
     <div className="overflow-hidden">
-      <table className="w-full text-left">
+      <table className="w-full text-left h-76">
         <thead>
-          <tr className="border-b border-gray-700">
+          <tr className="border-b border-black">
             <th className="py-3 px-4 text-sm font-semibold text-gray-300">
               Operation
             </th>
@@ -39,7 +38,7 @@ function TimingTable({ data }: TimingTableProps) {
           {data.map((row, index) => (
             <tr
               key={row.operation}
-              className={index % 2 === 0 ? "bg-gray-900" : "bg-gray-800"}
+              className={index % 2 === 0 ? "bg-[#323232]" : "bg-[#3f3f3f]"}
             >
               <td className="py-3 px-4 text-sm text-white">{row.operation}</td>
               <td className="py-3 px-4 text-sm text-gray-300 text-right font-mono">
@@ -56,10 +55,12 @@ function TimingTable({ data }: TimingTableProps) {
   );
 }
 
-export default function TimingStatsChart() {
-  const timing = EXAMPLE_DIAGNOSTIC_RESPONSE.diagnostics.timing;
-
-  if (!timing) {
+export default function TimingStatsChart({
+  data,
+}: {
+  data: TimingDiagnostics | undefined;
+}) {
+  if (!data) {
     return (
       <div className="text-white text-center p-8">
         No timing diagnostics available
@@ -67,9 +68,9 @@ export default function TimingStatsChart() {
     );
   }
 
-  const pieData = transformTimingForPieChart(timing);
-  const tableData = transformTimingForTable(timing);
-  const totalTime = calculateTotalTime(timing);
+  const pieData = transformTimingForPieChart(data);
+  const tableData = transformTimingForTable(data);
+  const totalTime = calculateTotalTime(data);
 
   return (
     <div className="space-y-6">
@@ -79,7 +80,7 @@ export default function TimingStatsChart() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Pie Chart */}
-        <div className="bg-gray-800 rounded-lg p-6 shadow-lg">
+        <div className="bg-[#282828] rounded-lg p-6 shadow-lg lg:h-[36rem]">
           <h3 className="text-lg font-semibold mb-4 text-white text-center">
             Time Distribution
           </h3>
@@ -90,9 +91,17 @@ export default function TimingStatsChart() {
                 cx="50%"
                 cy="50%"
                 labelLine={false}
-                label={({ name, percent }) =>
-                  `${name}: ${((percent || 0) * 100).toFixed(1)}%`
-                }
+                label={({ name, percent, x, y }) => (
+                  <text
+                    x={x}
+                    y={y}
+                    fill="#d1d5db"
+                    fontSize="14px"
+                    textAnchor={x > 200 ? "start" : "end"}
+                  >
+                    {`${name}: ${((percent || 0) * 100).toFixed(1)}%`}
+                  </text>
+                )}
                 outerRadius={100}
                 fill="#8884d8"
                 dataKey="value"
@@ -103,18 +112,18 @@ export default function TimingStatsChart() {
               </Pie>
               <Tooltip
                 contentStyle={{
-                  backgroundColor: "#1f2937",
+                  backgroundColor: "#d4d4d8",
                   border: "1px solid #374151",
                   borderRadius: "0.375rem",
-                  color: "#fff",
+                  color: "black",
                 }}
                 formatter={(value: number) => `${value.toFixed(4)}s`}
               />
               <Legend
                 verticalAlign="bottom"
-                height={36}
+                height={60}
                 iconType="circle"
-                wrapperStyle={{ color: "#9ca3af" }}
+                wrapperStyle={{ color: "#d1d5db", paddingTop: "20px" }}
               />
             </PieChart>
           </ResponsiveContainer>
@@ -122,25 +131,25 @@ export default function TimingStatsChart() {
           {/* Total Time */}
           <div className="mt-6 pt-4 border-t border-gray-700 text-center">
             <p className="text-sm text-gray-400 mb-1">Total Processing Time</p>
-            <p className="text-3xl font-bold text-blue-500">
+            <p className="text-3xl font-bold text-gray-300">
               {totalTime.toFixed(3)}s
             </p>
           </div>
         </div>
 
         {/* Stats Table */}
-        <div className="bg-gray-800 rounded-lg p-6 shadow-lg">
+        <div className="bg-[#282828] rounded-lg p-6 shadow-lg">
           <h3 className="text-lg font-semibold mb-4 text-white">
             Detailed Breakdown
           </h3>
           <TimingTable data={tableData} />
 
           {/* Performance Insights */}
-          <div className="mt-6 pt-4 border-t border-gray-700">
-            <p className="text-xs text-gray-400 mb-2">
+          <div className="mt-6 pt-4 border-t border-black">
+            <p className="text-sm text-gray-400 mb-2">
               <strong className="text-white">Performance Insights:</strong>
             </p>
-            <ul className="text-xs text-gray-400 space-y-1 list-disc list-inside">
+            <ul className="text-sm text-gray-400 space-y-1 list-disc list-inside">
               <li>
                 Parsing typically dominates total time for complex documents
               </li>

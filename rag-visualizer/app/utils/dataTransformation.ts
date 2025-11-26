@@ -36,7 +36,7 @@ function getColorForRange(
   idealMax?: number,
   percentage?: number
 ): string {
-  if (!idealMin || !idealMax) {
+  if (idealMin === undefined || idealMax === undefined) {
     return "#f97316"; // Default orange
   }
 
@@ -69,7 +69,7 @@ function getColorForRange(
 export function transformTimingForPieChart(
   timing: TimingDiagnostics
 ): TimingPieChartData[] {
-  const colors = ["#3b82f6", "#8b5cf6", "#ec4899", "#f59e0b"];
+  const colors = ["#71717a", "#d4d4d8", "#f97316", "#a1a1aa"];
 
   return [
     {

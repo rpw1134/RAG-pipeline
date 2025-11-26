@@ -1,3 +1,5 @@
+import { EmbeddingResponse } from "./types";
+
 const EMBEDDING_MODELS = [
   { value: "huggingface_small", label: "BAAI/bge-small-en-v1.5" },
   { value: "huggingface_base", label: "BAAI/bge-base-en-v1.5" },
@@ -19,7 +21,7 @@ const LLM_MODELS = [
   { value: "gpt-3.5-turbo", label: "gpt-3.5-turbo" },
 ];
 
-const EXAMPLE_DIAGNOSTIC_RESPONSE = {
+const EXAMPLE_DIAGNOSTIC_RESPONSE: EmbeddingResponse = {
   diagnostics: {
     chunk: {
       chunk_length: {

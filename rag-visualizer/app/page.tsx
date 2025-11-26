@@ -8,6 +8,7 @@ import {
   type DiagnosticsFormState,
   type QueryFormState,
 } from "@/components";
+import { EmbeddingResponse } from "./utils/types";
 
 type Mode = "diagnostics" | "query";
 
@@ -41,6 +42,9 @@ export default function Home() {
   const [isSubmitted, setIsSubmitted] = useState(true);
   const [isPondering, setIsPondering] = useState(false);
   const [collectionRefresh, setCollectionRefresh] = useState(0);
+  const [responseData, setResponseData] = useState<EmbeddingResponse | null>(
+    null
+  );
 
   const handleConfigSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,10 +76,12 @@ export default function Home() {
           body: JSON.stringify(config),
         });
       }
-      const data = await response.json();
+      const data: EmbeddingResponse = await response.json();
       console.log(data);
       setCollectionRefresh((prev) => prev + 1);
       setIsSubmitted(true);
+      setResponseData(data);
+      setMode("diagnostics");
     } catch (error) {
       console.error("Error submitting:", error);
     } finally {
@@ -129,7 +135,7 @@ export default function Home() {
 
           {/* Right content - Stats panel */}
           <main className="flex-1 pl-4 overflow-y-auto">
-            <StatsPanel mode={mode} />
+            <StatsPanel mode={mode} data={responseData} />
           </main>
         </div>
       )}
