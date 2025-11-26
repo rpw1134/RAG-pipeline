@@ -59,15 +59,15 @@ def perform_chunk_diagnostics(chunks: List[Document]) -> dict:
     # Calculate statistics for chunk lengths
     chunk_length_stats = calculate_metric_statistics(
         chunk_lengths_list,
-        ideal_min=500,
-        ideal_max=1500,
+        ideal_min=0,
+        ideal_max=2000,
         bins=[0, 500, 1000, 1500, 2000, float('inf')]
     )
 
     # Calculate statistics for cohesion scores
     cohesion_stats = calculate_metric_statistics(
         cohesion_scores if cohesion_scores else [0.0],
-        ideal_min=0.7,
+        ideal_min=0.6,
         ideal_max=1.0,
         bins=[0.0, 0.3, 0.5, 0.7, 0.85, 1.0]
     )
@@ -76,7 +76,7 @@ def perform_chunk_diagnostics(chunks: List[Document]) -> dict:
     separation_stats = calculate_metric_statistics(
         seperation_scores if seperation_scores else [0.0],
         ideal_min=0.1,
-        ideal_max=0.4,
+        ideal_max=0.6,
         bins=[0.0, 0.1, 0.2, 0.4, 0.6, 1.0]
     )
 
@@ -310,7 +310,10 @@ def perform_synthetic_query_diagnostics(chunks: List[Document], embedding_model,
         Dict containing hit_rate, mrr, and other diagnostic metrics,
         or an error dict if LLM response parsing fails.
     """
-    testable_chunks = random.choices(chunks, k=num_chunks)
+    if len(chunks)<num_chunks:
+        testable_chunks = chunks
+    else:
+        testable_chunks = random.choices(chunks, k=num_chunks)
     # Keep original page_content for DB comparison
     original_contents = [chunk.page_content for chunk in testable_chunks]
     # Add index prefix only for LLM prompt
@@ -334,6 +337,8 @@ def perform_synthetic_query_diagnostics(chunks: List[Document], embedding_model,
         return {"error": "Response is not valid JSON", "response": response}
 
     try:
+        print(len(response))
+        print(len(testable_chunks))
         res = evaluate_synthetic_queries(queries=response, documents=original_contents, embedding_model=embedding_model, num_results=num_results, num_rerank=num_rerank, rerank=rerank) 
     except Exception as e:
         return {"error": f"Error during synthetic query evaluation: {str(e)}"}

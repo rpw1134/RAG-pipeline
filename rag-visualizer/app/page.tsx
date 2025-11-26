@@ -38,7 +38,7 @@ export default function Home() {
     initialDiagnosticsState
   );
   const [queryState, setQueryState] = useState(initialQueryState);
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(true);
   const [isPondering, setIsPondering] = useState(false);
   const [collectionRefresh, setCollectionRefresh] = useState(0);
 
@@ -86,7 +86,10 @@ export default function Home() {
   return (
     <div className="relative min-h-screen bg-background text-foreground">
       {/* Collection Status - always visible in top right */}
-      <CollectionStatus className="fixed top-4 right-4 z-10" refreshTrigger={collectionRefresh} />
+      <CollectionStatus
+        className="fixed top-4 right-4 z-10"
+        refreshTrigger={collectionRefresh}
+      />
 
       {!isSubmitted ? (
         // Centered layout before submission
