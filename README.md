@@ -106,13 +106,11 @@ If you only use HuggingFace models, the API key is optional.
 poetry run dev
 ```
 
-The API will start on `http://localhost:8000`. Visit `http://localhost:8000/docs` for the interactive API documentation.
+The API will start on `http://localhost:8000`.
 
 ### Available Scripts
 
 - `poetry run dev` - Start development server
-- `poetry run pytest` - Run tests
-- `poetry run pytest --cov` - Run tests with coverage
 
 ---
 
@@ -152,8 +150,9 @@ The pipeline supports multiple embedding models:
 
 - **HuggingFace Models:**
 
-  - `huggingface_small` - Sentence transformers (no API key needed)
-  - `huggingface_bge_large` - BGE large model (no API key needed)
+  - `huggingface_small` - BGE small model (no API key needed)
+  - `huggingface_base` - BGE base model (no API key needed)
+  - `huggingface_large` - BGE large model (no API key needed)
 
 - **OpenAI Models** (requires API key):
   - `openai_small` - text-embedding-3-small
@@ -163,7 +162,7 @@ The pipeline supports multiple embedding models:
 
 - **Recursive** - Splits text recursively by paragraphs, sentences, then characters
 - **Semantic** - Groups semantically similar content together
-- **Token-based** - Splits by token count
+- **Simple** - Splits by token count
 
 ### LLM Models
 
@@ -241,7 +240,7 @@ These metrics evaluate how well your retrieval system finds relevant documents:
 - **How to use it:**
   - **Low (<0.5):** Good - diverse results covering different aspects
   - **Medium (0.5-0.7):** Moderate - some repeated information
-  - **High (>0.7):** Poor - results are too similar, wasting context window
+  - **High (>0.7):** Poor - results are too similar, wasting context window. Note, this is not always a bad thing.
   - Use reranking or diversity-focused retrieval to reduce redundancy
 
 ### ⏱️ Timing Diagnostics
@@ -253,12 +252,6 @@ Track performance bottlenecks in your pipeline:
 - **Embedding Time:** Time to generate vector embeddings
 - **Add Time:** Time to store vectors in the database
 - **Total Time:** Sum of all processing steps
-
-**How to use timing data:**
-
-- Identify bottlenecks in your pipeline
-- Compare performance across different models and strategies
-- Optimize based on your use case (speed vs. quality trade-offs)
 
 ---
 
