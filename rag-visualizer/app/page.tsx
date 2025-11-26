@@ -149,7 +149,7 @@ export default function Home() {
         </div>
       ) : (
         // Split layout after submission
-        <div className="flex min-h-screen">
+        <div className="flex h-screen">
           {/* Left sidebar - Config panel */}
           <aside className="w-80 shrink-0 border-r border-border bg-surface p-4 overflow-y-auto">
             <ConfigPanel
@@ -168,7 +168,7 @@ export default function Home() {
           </aside>
 
           {/* Right content - Stats panel */}
-          <main className="flex-1 pl-4 overflow-y-auto">
+          <main className="flex-1 p-4 overflow-hidden">
             <StatsPanel mode={mode} data={responseData} />
           </main>
         </div>

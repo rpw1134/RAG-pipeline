@@ -53,8 +53,8 @@ export function StatsPanel({ mode, data }: StatsPanelProps) {
   console.log(data);
   if (mode === "query") {
     return (
-      <div className="h-full flex flex-col rounded-lg border border-border bg-surface">
-        <div className="flex-1 p-6 overflow-hidden">
+      <div className="h-full flex flex-col rounded-lg border border-border bg-surface overflow-hidden">
+        <div className="flex-1 p-6 overflow-y-auto">
           {!data || !isQueryResponse(data) ? (
             <div className="text-white text-center p-8">
               No query results available

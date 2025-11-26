@@ -69,7 +69,7 @@ function getColorForRange(
 export function transformTimingForPieChart(
   timing: TimingDiagnostics
 ): TimingPieChartData[] {
-  const colors = ["#71717a", "#d4d4d8", "#f97316", "#a1a1aa"];
+  const colors = ["#f97316", "#71717a", "#d4d4d8", "#a1a1aa"];
 
   return [
     {

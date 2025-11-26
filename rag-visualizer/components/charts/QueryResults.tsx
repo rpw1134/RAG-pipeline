@@ -14,15 +14,15 @@ export default function QueryResults({ data }: QueryResultsProps) {
   }
 
   return (
-    <div className="space-y-6 h-full flex flex-col">
+    <div className="flex flex-col gap-6">
       {/* Top Section: LLM Response and Confidence Score */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 shrink-0">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* LLM Response */}
         <div className="bg-[#282828] rounded-lg p-8 shadow-lg">
-          <h3 className="text-2xl font-semibold mb-4 text-white">
+          <h3 className="text-2xl font-semibold mb-4 text-white underline underline-offset-8">
             LLM Response
           </h3>
-          <div className="text-gray-300 text-lg leading-relaxed whitespace-pre-wrap">
+          <div className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap">
             {data.llm_response}
           </div>
         </div>
@@ -42,7 +42,7 @@ export default function QueryResults({ data }: QueryResultsProps) {
       </div>
 
       {/* Bottom Section: Retrieved Context */}
-      <div className="bg-[#282828] rounded-lg p-8 shadow-lg flex-1 overflow-auto">
+      <div className="bg-[#282828] rounded-lg p-8 shadow-lg">
         <h3 className="text-2xl font-semibold mb-6 text-white">
           Retrieved Context
         </h3>
