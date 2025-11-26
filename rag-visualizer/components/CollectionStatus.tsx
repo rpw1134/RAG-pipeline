@@ -64,7 +64,7 @@ export function CollectionStatus({
     >
       <button
         onClick={() => setIsCollapsed(!isCollapsed)}
-        className="w-full flex items-center justify-between mb-2 hover:opacity-80 transition-opacity"
+        className="w-full flex items-center justify-between mb-2 hover:opacity-80 transition-opacity cursor-pointer"
       >
         <h3 className="text-xs font-semibold text-muted uppercase tracking-wide">
           Collections

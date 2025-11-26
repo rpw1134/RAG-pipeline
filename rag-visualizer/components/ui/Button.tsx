@@ -18,12 +18,12 @@ export function Button({
       type={type}
       onClick={onClick}
       disabled={disabled || isPondering}
-      className={`w-full rounded-lg px-6 py-3 text-sm font-semibold text-white transition-all focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background ${
+      className={`w-full rounded-lg px-6 py-3 text-sm font-semibold text-white transition-all focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background cursor-pointer ${
         isPondering
           ? "bg-accent/80 cursor-wait"
           : disabled
-            ? "bg-accent/50 cursor-not-allowed"
-            : "bg-accent hover:bg-accent-hover"
+          ? "bg-accent/50 cursor-not-allowed"
+          : "bg-accent hover:bg-accent-hover"
       }`}
     >
       {isPondering ? (

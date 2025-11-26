@@ -22,7 +22,7 @@ function TimingTable({ data }: TimingTableProps) {
     <div className="overflow-hidden">
       <table className="w-full text-left h-76">
         <thead>
-          <tr className="border-b border-black">
+          <tr className="">
             <th className="py-3 px-4 text-sm font-semibold text-gray-300">
               Operation
             </th>
